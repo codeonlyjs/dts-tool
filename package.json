@@ -1,6 +1,6 @@
 {
   "name": "@codeonlyjs/dts-tool",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Collapse modules in .d.ts file to a single module",
   "copyright": "Copyright © 2024-present codeonlyjs.org",
   "main": "index.js",
