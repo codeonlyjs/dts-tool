@@ -2,10 +2,13 @@
 
 import path from 'node:path';
 import url from 'node:url';
+import fs from 'node:fs';
 import ts from 'typescript';
 import { MappedSource } from "./MappedSource.js";
 import { find_bol_ws, find_next_line_ws } from './LineMap.js';
 import { clargs, showPackageVersion, showArgs } from "@toptensoftware/clargs";
+import { SourceMapConsumer } from "@jridgewell/source-map";
+import { LineMap } from "./LineMap.js";
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
@@ -13,6 +16,7 @@ let inFile = null;
 let outFile = null;
 let moduleName = null;
 let stripInternal = false;
+let listDefs = false;
 
 
 function showVersion()
@@ -30,6 +34,7 @@ function showHelp()
     showArgs({
         "<dtsfile>": "The input .d.ts file (will be overwritten)",
         "<moduleName>": "The module name of the resulting collapsed .d.ts file",
+        "--list": "List definitions and source locations",
         "--strip-internal": "Strip declarations marked @internal",
         "-v, --version": "Show version info",
         "-h, --help":    "Show this help",
@@ -66,6 +71,10 @@ while (args.next())
             stripInternal = args.readBoolValue();
             break;
 
+        case "list":
+            listDefs = args.readBoolValue();
+            break;
+
         case "out":
             outFile = args.readValue();
             break;
@@ -85,40 +94,105 @@ while (args.next())
     }
 }
 
-if (!inFile || !moduleName)
+if (!inFile)
 {
-    console.error("missing arguments, input file and module name are both required.");
+    console.error("missing argument: input file");
+    process.exit(7);
+}
+
+if (!moduleName && !listDefs)
+{
+    console.error("missing argument: module name");
     process.exit(7);
 }
 
 
-// Read input file
-let msIn = MappedSource.FromSourceFile(inFile);
+if (listDefs)
+{
+    let source = fs.readFileSync(inFile, "utf8");
+    let mapName = /\/\/# sourceMappingURL=(.*)$/m.exec(source);
+    let smc;
+    if (mapName)
+    {
+        let fullMapName = path.join(path.dirname(path.resolve(inFile)), mapName[1]);
+        smc = new SourceMapConsumer(JSON.parse(fs.readFileSync(fullMapName, "utf8")));
+    }
 
-// Parse input file
-let ast = ts.createSourceFile(
-    inFile, 
-    msIn.source,
-    ts.ScriptTarget.Latest, 
-    true, 
-);
+    let lm = new LineMap(source, { lineBase: 1 });
 
-// Build module list
-let moduleList = buildModuleList(ast);
+    // Parse input file
+    let ast = ts.createSourceFile(
+        inFile, 
+        source,
+        ts.ScriptTarget.Latest, 
+        true, 
+    );
 
-// Build module map
-let moduleMap = new Map();
-moduleList.forEach(x => moduleMap.set(x.name, x));
+    // List all definitions
+    let moduleName = "";
+    ts.forEachChild(ast, list_definitions);
 
-// Remove unneeded imports
-moduleList.forEach(x => removeImports(x));
+    function list_definitions(node)
+    {
+        if (ts.isModuleDeclaration(node))
+        {
+            moduleName = node.name.getText(ast);
+            console.log(`${moduleName}`);
+            ts.forEachChild(node, list_definitions);
+            moduleName = "";
+            return;
+        }
+        else if (is_declaration_node(node))
+        {
+            if (node.name)
+            {
 
-// Write new file
-let msOut = new MappedSource();
-msOut.append(`declare module "${moduleName}" {\n`);
-moduleList.forEach(x => msOut.append(x.mappedSource));
-msOut.append(`\n}\n`);
-msOut.save(outFile ?? inFile);
+                let name = node.name.getText(ast);
+                //let name2 = source.substring(node.name.pos, node.name.pos + 10);
+                let pos = "";
+                if (smc)
+                {
+                    let namepos = node.getStart(ast);
+                    let lp = lm.fromOffset(namepos);
+                    let lpo = smc.originalPositionFor(lp);
+                    pos = `${inFile}:${lp.line}:${lp.column} => ${lpo.source}:${lpo.line}:${lpo.column}`;
+                }
+                console.log(`  ${name} ${pos}`);
+            }
+        }
+        ts.forEachChild(node, list_definitions);
+    }
+}
+else
+{
+    // Read input file
+    let msIn = MappedSource.FromSourceFile(inFile);
+    
+    // Parse input file
+    let ast = ts.createSourceFile(
+        inFile, 
+        msIn.source,
+        ts.ScriptTarget.Latest, 
+        true, 
+    );
+
+    // Build module list
+    let moduleList = buildModuleList(ast);
+
+    // Build module map
+    let moduleMap = new Map();
+    moduleList.forEach(x => moduleMap.set(x.name, x));
+
+    // Remove unneeded imports
+    moduleList.forEach(x => removeImports(x));
+
+    // Write new file
+    let msOut = new MappedSource();
+    msOut.append(`declare module "${moduleName}" {\n`);
+    moduleList.forEach(x => msOut.append(x.mappedSource));
+    msOut.append(`\n}\n`);
+    msOut.save(outFile ?? inFile);
+}
 
 function buildModuleList(ast)
 {
@@ -201,7 +275,7 @@ function removeImports(module)
                 }
 
                 // Remove internal declarations
-                if (comments.length)
+                if (comments.length && stripInternal)
                 {
                     let c = comments[comments.length - 1];
                     let text = msIn.source.substring(c.pos, c.end);

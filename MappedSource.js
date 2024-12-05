@@ -14,8 +14,10 @@ export class MappedSource
 
     save(filename)
     {
+        let mapfile = filename + ".map";
+
         // Write the final source file
-        let finalSource = `${this.source}\n//# sourceMappingURL=${filename}\n`;
+        let finalSource = `${this.source}\n//# sourceMappingURL=${mapfile}\n`;
         fs.writeFileSync(filename, finalSource, "utf8");
 
         // Create line map
@@ -37,7 +39,7 @@ export class MappedSource
                 name: m.name
             });
         }
-        fs.writeFileSync(filename + ".map", JSON.stringify(smg.toJSON(), null, 4), "utf8");
+        fs.writeFileSync(mapfile, JSON.stringify(smg.toJSON(), null, 4), "utf8");
     }
 
     static FromSourceFile(file)
