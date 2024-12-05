@@ -12,7 +12,7 @@
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}\\index.js",
-            "args": [ "../core/index.d.ts", "--list" ]
+            "args": [ "../core/index.d.ts", "@codeonlyjs/blah", "--out:./test.d.ts" ]
 
         }
     ]
