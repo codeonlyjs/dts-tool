@@ -1,0 +1,30 @@
+{
+  "name": "@codeonlyjs/dts-tool",
+  "version": "0.0.1",
+  "description": "Collapse modules in .d.ts file to a single module",
+  "copyright": "Copyright © 2024-present codeonlyjs.org",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {},
+  "bin": {
+    "dts-tool": "./index.js"
+  },
+  "author": "Topten Software",
+  "contributors": [
+    {
+      "name": "Brad Robinson",
+      "email": "contact@toptensoftware.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codeonlyjs/dts-tool.git"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@jridgewell/source-map": "^0.3.6",
+    "@toptensoftware/clargs": "github:toptensoftware/clargs",
+    "typescript": "^5.7.2"
+  }
+}
+
