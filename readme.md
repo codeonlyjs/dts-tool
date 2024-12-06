@@ -58,7 +58,7 @@ To generate the `.d.ts` file you can setup a `tsconfig.json` like this:
 }
 ```
 
-and run `tsc --project tsconfig.emit.json`.  `tsc` to produce this `index.d.ts` file:
+and run `tsc --project tsconfig.json`.  `tsc` to produce this `index.d.ts` file:
 
 ```typescript
 declare module "foo" {
