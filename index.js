@@ -3,12 +3,13 @@
 import path from 'node:path';
 import url from 'node:url';
 import fs from 'node:fs';
-import ts from 'typescript';
+import ts, { transpileModule } from 'typescript';
 import { MappedSource } from "./MappedSource.js";
 import { find_bol_ws, find_next_line_ws } from './LineMap.js';
 import { clargs, showPackageVersion, showArgs } from "@toptensoftware/clargs";
 import { SourceMapConsumer } from "@jridgewell/source-map";
 import { LineMap } from "./LineMap.js";
+import { SourceFile } from "./SourceFile.js";
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
@@ -17,6 +18,7 @@ let outFile = null;
 let moduleName = null;
 let stripInternal = false;
 let listDefs = false;
+let listMap = false;
 let lookupMapPosition = null;
 
 
@@ -38,6 +40,7 @@ function showHelp()
         "--list": "List definitions and source locations",
         "--strip-internal": "Strip declarations marked @internal",
         "--map:<line>[:col]": "Show source map info for source/line",
+        "--list-map": "List all contents of map file",
         "-v, --version": "Show version info",
         "-h, --help":    "Show this help",
     });
@@ -97,6 +100,10 @@ while (args.next())
             break;
         }
 
+        case "list-map":
+            listMap = true;
+            break;
+
         case null:
             if (inFile == null)
                 inFile = args.readValue();
@@ -118,7 +125,7 @@ if (!inFile)
     process.exit(7);
 }
 
-if (!moduleName && !listDefs && !lookupMapPosition)
+if (!moduleName && !listDefs && !lookupMapPosition && !listMap)
 {
     console.error("missing argument: module name");
     process.exit(7);
@@ -133,6 +140,10 @@ else if (lookupMapPosition)
 {
     lookup_map(lookupMapPosition);
 }
+else if (listMap)
+{
+    list_map();
+}
 else
 {
     collapse_modules();
@@ -142,15 +153,18 @@ else
 function collapse_modules()
 {
     // Read input file
-    let msIn = MappedSource.FromSourceFile(inFile);
+    let source = SourceFile.fromFile(inFile);
     
     // Parse input file
     let ast = ts.createSourceFile(
         inFile, 
-        msIn.source,
+        source.code,
         ts.ScriptTarget.Latest, 
         true, 
     );
+
+    // Simplify source map
+    let msIn = simplifySourceMap(ast);
 
     // Build module list
     let moduleList = buildModuleList(ast);
@@ -168,6 +182,67 @@ function collapse_modules()
     moduleList.forEach(x => msOut.append(x.mappedSource));
     msOut.append(`\n}\n`);
     msOut.save(outFile ?? inFile);
+
+    function simplifySourceMap(ast)
+    {
+        // Create a simplified symbol map with just the 
+        // declared names
+
+        // Start with just the source code
+        let map = [];
+        ts.forEachChild(ast, walk);
+        return new MappedSource(source.code, map);
+
+        function walk(node)
+        {
+            if (is_declaration_node(node) && node.name && node.kind != ts.SyntaxKind.ModuleDeclaration)
+            {
+                // Get the name and its position
+                let name = node.name.getText(ast);
+                let nameOffset = node.name.getStart(ast);
+
+                // Find the original position
+                let namepos = source.lineMap.fromOffset(nameOffset);
+                let originalPos = source.sourceMap.originalPositionFor(namepos);
+                if (originalPos.line)
+                {
+                    let genPos = source.sourceMap.generatedPositionFor(originalPos);
+
+                    // Get precise position of actual name rather than just start of line
+                    if (genPos.line == namepos.line)
+                    {
+                        let delta = namepos.column - genPos.column;
+                        originalPos.column += delta;
+                        genPos.column += delta;
+                    }
+                    else
+                        debugger;
+
+                    // Start of name
+                    let offset = source.lineMap.toOffset(genPos.line, genPos.column);
+                    map.push({
+                        offset: offset,
+                        name: name,
+                        source: originalPos.source,
+                        originalLine: originalPos.line,
+                        originalColumn: originalPos.column,
+                    });
+
+                    // End of name
+                    map.push({
+                        offset: offset + name.length,
+                        name: name,
+                        source: originalPos.source,
+                        originalLine: originalPos.line,
+                        originalColumn: originalPos.column + name.length,
+                    });
+                }
+            }
+
+            ts.forEachChild(node, walk);
+        }
+
+    }
 
     function buildModuleList(ast)
     {
@@ -383,7 +458,7 @@ function list_definitions()
     }
 }
 
-function lookup_map(pos)
+async function lookup_map(pos)
 {
     let mapFile;
     if (inFile.endsWith(".map"))
@@ -398,7 +473,26 @@ function lookup_map(pos)
     }
 
     let smc = new SourceMapConsumer(JSON.parse(fs.readFileSync(mapFile, "utf8")));
-
     let op = smc.originalPositionFor(pos);
     console.log(`${inFile}:${pos.line}:${pos.column} => ${op.source}("${op.name}"):${op.line}:${op.column}`);
+}
+
+async function list_map(pos)
+{
+    let mapFile;
+    if (inFile.endsWith(".map"))
+    {
+        mapFile = inFile;
+    }
+    else
+    {
+        let source = fs.readFileSync(inFile, "utf8");
+        let mapName = /\/\/# sourceMappingURL=(.*)$/m.exec(source);
+        mapFile = path.join(path.dirname(path.resolve(inFile)), mapName[1]);
+    }
+
+    let smc = new SourceMapConsumer(JSON.parse(fs.readFileSync(mapFile, "utf8")));
+    smc.eachMapping(x => {
+        console.log(`${x.generatedLine}:${x.generatedColumn} => ${x.source}:${x.originalLine}:${x.originalColumn} "${x.name}"`);
+    });
 }
