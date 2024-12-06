@@ -45,16 +45,16 @@ To generate the `.d.ts` file you can setup a `tsconfig.json` like this:
 
 ```json
 {
-    "include": [
-        "index.js",
-    ],
-	"compilerOptions": {
-		"allowJs": true,
-		"declaration": true,
-        "emitDeclarationOnly": true,
-        "outFile": "index.d.ts",
-        "declarationMap": true,
-	}
+  "include": [
+    "index.js",
+  ],
+  "compilerOptions": {
+    "allowJs": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outFile": "index.d.ts",
+    "declarationMap": true,
+  }
 }
 ```
 
