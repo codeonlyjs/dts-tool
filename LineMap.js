@@ -1,7 +1,24 @@
 import { binarySearch } from "./binarySearch.js";
 
+/**
+ * @typedef {object} LineColumn
+ * @property {number} line A line number
+ * @property {number} column A column number
+ */
+
+/**
+ * Implements line/column to offset index mapping
+ * for a string
+ */
 export class LineMap
 {
+    /**
+     * Constructs a new LineMap
+     * @param {string} str The string to be mapped
+     * @param {object} options Options
+     * @param {number} options.lineBase Base index for line numbers (default = 0)
+     * @param {number} options.columnBase Base index for column numbers (default = 0)
+     */
     constructor(str, options)
     {
         // Store the total length
@@ -26,6 +43,11 @@ export class LineMap
         }
     }
 
+    /**
+     * Converts a character index offset to a line/column position
+     * @param {number} offset The character index to convert
+     * @returns {LineColumn}
+     */
     fromOffset(offset)
     {
         // Do a binary search for the line
@@ -51,6 +73,12 @@ export class LineMap
         }
     }
 
+    /**
+     * Converts a line and column number to a character index
+     * @param {number} line The line number
+     * @param {number} column The column number
+     * @returns {number}
+     */
     toOffset(line, column)
     {
         line -= this.options.lineBase;
@@ -64,6 +92,12 @@ export class LineMap
     }
 }
 
+/**
+ * Find the begining of a line, only skipping over white-space
+ * @param {string} str The string to scan
+ * @param {number} from The starting index
+ * @returns {number}
+ */
 export function find_bol_ws(str, from)
 {
     while (from > 0)
@@ -75,6 +109,12 @@ export function find_bol_ws(str, from)
     return from;
 }
 
+/**
+ * Find the end of a line, only skipping over white-space
+ * @param {string} str The string to scan
+ * @param {number} from The starting index
+ * @returns {number}
+ */
 export function find_eol_ws(str, from)
 {
     while (from < str.length)
@@ -86,6 +126,12 @@ export function find_eol_ws(str, from)
     return from;
 }
 
+/**
+ * Skip EOL character(s) in a string
+ * @param {string} str The string to scan
+ * @param {number} from The starting index
+ * @returns {number}
+ */
 export function skip_eol(str, from)
 {
     if (str[from] == '\r' && str[from] == '\n')
@@ -98,6 +144,12 @@ export function skip_eol(str, from)
     return from;
 }
 
+/**
+ * Find the next line, only skipping white-space
+ * @param {string} str The string to scan
+ * @param {number} fromt The starting index
+ * @returns {number}
+ */
 export function find_next_line_ws(str, from)
 {
     return skip_eol(str, find_eol_ws(str, from));

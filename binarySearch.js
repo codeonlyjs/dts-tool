@@ -1,3 +1,12 @@
+/**
+ * Performs a binary search on an array
+ * Returns <0 if not found, use -val-1 to convert to positive insert position
+ * compare_items should return <0 if a < b, >0 if a > b otherwise 0
+ * @param {any[]} sortedArray Any sorted array
+ * @param {(a:any,b:any) => number} compare_items A callback to compare two items
+ * @param {any} item The item being searched for
+ * @returns {number}
+ */
 export function binarySearch(sortedArray, compare_items, item) 
 {
     let left = 0;

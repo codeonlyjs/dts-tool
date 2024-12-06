@@ -4,14 +4,39 @@ import { SourceMapConsumer, SourceMapGenerator } from "@jridgewell/source-map";
 import { LineMap } from "./LineMap.js";
 import { binarySearch } from './binarySearch.js';
 
+/**
+ * @typedef MappedPoint
+ * @property {number} offset Offset in the source file
+ * @property {string} source Original source file
+ * @property {string} name Name of the mapped location
+ * @property {number} originalLine Original line number (1 based)
+ * @property {number} originalColumn Original column number (0 based)
+ */
+
+/**
+ * Manages a chunk of source code with an associated set of
+ * mapping points.  Provides methods for insert/deleting etc
+ * in the source code while keeping the mapping points up to
+ * date.  Also supports inserting other MappedSource objects
+ * in which case a combined set of mapped points is generated.
+ */
 export class MappedSource
 {
+    /**
+     * Constructs a new MappedSource
+     * @param {string} source
+     * @param {MappedPoint[]} map
+     */
     constructor(source, map)
     {
         this.source = source ?? "";
         this.map = map ?? [];
     }
 
+    /**
+     * Save the source code and the .map
+     * @returns {void}
+     */
     save(filename)
     {
         let mapfile = filename + ".map";
@@ -42,6 +67,11 @@ export class MappedSource
         fs.writeFileSync(mapfile, JSON.stringify(smg.toJSON(), null, 4), "utf8");
     }
 
+    /**
+     * Create a MappedSource object
+     * @param {string} file The source file to load
+     * @returns {MappedSource}
+     */
     static FromSourceFile(file)
     {  
         // Read the source file
@@ -73,7 +103,13 @@ export class MappedSource
         return new MappedSource(source, map);
     }
 
-    // Take a slice as a new MappedSource
+    /** 
+     * Take a slice as a new MappedSource returning a new
+     * MappedSource instance representing the slice
+     * @param {number} start Starting offset
+     * @param {number} end Ending offset
+     * @returns {MappedSource}
+     */
     substring(start, end)
     {
         let source = this.source.substring(start, end);
@@ -88,6 +124,13 @@ export class MappedSource
         return new MappedSource(source, map);
     }
 
+    /**
+     * Splice into this MappedSource
+     * @param {number} offset Offset at which to splice
+     * @param {number} length Number of characters to delete
+     * @param {string | MappedSource} string String or MappedSource instance to insert at offset
+     * @returns {void}
+     */
     splice(offset, length, string)
     {
         if (offset < 0)
@@ -147,16 +190,33 @@ export class MappedSource
         }
     }
 
+    /**
+     * Insert into this MappedSource
+     * @param {number} offset Offset at which to splice
+     * @param {string | MappedSource} string String or MappedSource instance to insert at offset
+     * @returns {void}
+     */
     insert(offset, string)
     {
         this.splice(offset, 0, string);
     }
 
+    /**
+     * Delete parts of  this MappedSource
+     * @param {number} offset Offset at which to splice
+     * @param {number} length Number of characters to delete
+     * @returns {void}
+     */
     delete(offset, length)
     {
         this.splice(offset, length, "");
     }
 
+    /**
+     * Append to this MappedSource
+     * @param {string | MappedSource } str The string to append
+     * @returns {void}
+     */
     append(str)
     {
         this.splice(this.source.length, 0, str);
