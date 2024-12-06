@@ -17,6 +17,7 @@ let outFile = null;
 let moduleName = null;
 let stripInternal = false;
 let listDefs = false;
+let lookupMapPosition = null;
 
 
 function showVersion()
@@ -36,6 +37,7 @@ function showHelp()
         "<moduleName>": "The module name of the resulting collapsed .d.ts file",
         "--list": "List definitions and source locations",
         "--strip-internal": "Strip declarations marked @internal",
+        "--map:<line>[:col]": "Show source map info for source/line",
         "-v, --version": "Show version info",
         "-h, --help":    "Show this help",
     });
@@ -79,6 +81,22 @@ while (args.next())
             outFile = args.readValue();
             break;
 
+        case "map":
+        {
+            let parts = args.readValue().split(":");
+            if (parts.length == 1)
+            {
+                lookupMapPosition = { line: parseInt(parts[0]), column: 0 };
+            }
+            else if (parts.length == 2)
+            {
+                lookupMapPosition = { line: parseInt(parts[0]), column: parseInt(parts[1]) };
+            }
+            else
+                throw new Error("Invalid line:col value");
+            break;
+        }
+
         case null:
             if (inFile == null)
                 inFile = args.readValue();
@@ -100,7 +118,7 @@ if (!inFile)
     process.exit(7);
 }
 
-if (!moduleName && !listDefs)
+if (!moduleName && !listDefs && !lookupMapPosition)
 {
     console.error("missing argument: module name");
     process.exit(7);
@@ -110,6 +128,10 @@ if (!moduleName && !listDefs)
 if (listDefs)
 {
     list_definitions();
+}
+else if (lookupMapPosition)
+{
+    lookup_map(lookupMapPosition);
 }
 else
 {
@@ -342,13 +364,14 @@ function list_definitions()
         {
             if (node.name)
             {
-
                 let name = node.name.getText(ast);
+                if (name == "nextFrame")
+                    debugger;
                 //let name2 = source.substring(node.name.pos, node.name.pos + 10);
                 let pos = "";
                 if (smc)
                 {
-                    let namepos = node.getStart(ast);
+                    let namepos = node.name.getStart(ast);
                     let lp = lm.fromOffset(namepos);
                     let lpo = smc.originalPositionFor(lp);
                     pos = `${inFile}:${lp.line}:${lp.column} => ${lpo.source}:${lpo.line}:${lpo.column}`;
@@ -358,4 +381,24 @@ function list_definitions()
         }
         ts.forEachChild(node, list_definitions);
     }
+}
+
+function lookup_map(pos)
+{
+    let mapFile;
+    if (inFile.endsWith(".map"))
+    {
+        mapFile = inFile;
+    }
+    else
+    {
+        let source = fs.readFileSync(inFile, "utf8");
+        let mapName = /\/\/# sourceMappingURL=(.*)$/m.exec(source);
+        mapFile = path.join(path.dirname(path.resolve(inFile)), mapName[1]);
+    }
+
+    let smc = new SourceMapConsumer(JSON.parse(fs.readFileSync(mapFile, "utf8")));
+
+    let op = smc.originalPositionFor(pos);
+    console.log(`${inFile}:${pos.line}:${pos.column} => ${op.source}("${op.name}"):${op.line}:${op.column}`);
 }
