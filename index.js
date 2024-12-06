@@ -22,6 +22,18 @@ let listMap = false;
 let lookupMapPosition = null;
 
 
+let lastOriginalFileName = null;
+let lastOriginalFile;
+function loadOriginalFile(sourceFileName)
+{
+    if (lastOriginalFileName == sourceFileName)
+        return lastOriginalFile;
+
+    lastOriginalFileName = sourceFileName;
+    lastOriginalFile = SourceFile.fromFile(sourceFileName);
+    return lastOriginalFile;
+}
+
 function showVersion()
 {
     showPackageVersion(path.join(__dirname, "package.json"));
@@ -149,11 +161,12 @@ else
     collapse_modules();
 }
 
-
 function collapse_modules()
 {
     // Read input file
     let source = SourceFile.fromFile(inFile);
+
+    let relbase = path.dirname(path.resolve(inFile));
     
     // Parse input file
     let ast = ts.createSourceFile(
@@ -201,41 +214,62 @@ function collapse_modules()
                 let name = node.name.getText(ast);
                 let nameOffset = node.name.getStart(ast);
 
-                // Find the original position
-                let namepos = source.lineMap.fromOffset(nameOffset);
-                let originalPos = source.sourceMap.originalPositionFor(namepos);
-                if (originalPos.line)
-                {
-                    let genPos = source.sourceMap.generatedPositionFor(originalPos);
+                if (name == "defaultClassNames")
+                    debugger;
 
-                    // Get precise position of actual name rather than just start of line
-                    if (genPos.line == namepos.line)
+                // Ignore private fields
+                if (!name.startsWith("#"))
+                {
+                    // Find the original position
+                    let namepos = source.lineMap.fromOffset(nameOffset);
+                    let originalPos = source.sourceMap.originalPositionFor(namepos);
+                    if (originalPos.source)
                     {
-                        let delta = namepos.column - genPos.column;
-                        originalPos.column += delta;
-                        genPos.column += delta;
+                        let originalSource = originalPos.source;
+
+                        // Load the original file
+                        let originalSourceFile = loadOriginalFile(path.join(relbase, originalPos.source));
+
+                        // Look for the symbol
+
+                        // Searching from the start of the line instead of the original position column
+                        // helps this works for cases like where name is before the declaration eg:  "{ name: function () }"
+                        // In these cases the originalPos.column is after "name"
+                        let originalOffsetStart = originalSourceFile.lineMap.toOffset(originalPos.line, 0);//originalPos.column);
+
+                        let rx = new RegExp(regexp_for_name(name), 'g');
+                        rx.lastIndex = originalOffsetStart;
+                        let m = rx.exec(originalSourceFile.code);
+                        if (m)
+                        {
+                            originalOffsetStart = m.index;
+                            originalPos = originalSourceFile.lineMap.fromOffset(originalOffsetStart);
+                            
+                            // Start of name
+                            map.push({
+                                offset: nameOffset,
+                                name: name,
+                                source: originalSource,
+                                originalLine: originalPos.line,
+                                originalColumn: originalPos.column,
+                            });
+
+                            // End of name
+                            map.push({
+                                offset: nameOffset + name.length,
+                                name: name,
+                                source: originalSource,
+                                originalLine: originalPos.line,
+                                originalColumn: originalPos.column + name.length,
+                            });
+                        }
+                        else
+                        {
+                            console.error(`warning: couldn't find original position for '${name}' - ${namepos.line}:${namepos.column}'`);
+                        }
                     }
                     else
-                        debugger;
-
-                    // Start of name
-                    let offset = source.lineMap.toOffset(genPos.line, genPos.column);
-                    map.push({
-                        offset: offset,
-                        name: name,
-                        source: originalPos.source,
-                        originalLine: originalPos.line,
-                        originalColumn: originalPos.column,
-                    });
-
-                    // End of name
-                    map.push({
-                        offset: offset + name.length,
-                        name: name,
-                        source: originalPos.source,
-                        originalLine: originalPos.line,
-                        originalColumn: originalPos.column + name.length,
-                    });
+                        console.error(`warning: couldn't find original position for '${name}' - ${namepos.line}:${namepos.column} (no original pos)`);
                 }
             }
 
@@ -495,4 +529,19 @@ async function list_map(pos)
     smc.eachMapping(x => {
         console.log(`${x.generatedLine}:${x.generatedColumn} => ${x.source}:${x.originalLine}:${x.originalColumn} "${x.name}"`);
     });
+}
+
+
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
+function regexp_for_name(name) {
+    let rx = "";
+    if (!name.startsWith("$"))
+        rx += "\\b";
+    rx += escapeRegExp(name);
+    if (!name.endsWith("$"))
+        rx += "\\b";
+    return rx;
 }
