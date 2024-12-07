@@ -3,7 +3,7 @@
 import path from 'node:path';
 import url from 'node:url';
 import { clargs, showPackageVersion, showArgs } from "@toptensoftware/clargs";
-import { cmdDemod } from "./cmdDemod.js";
+import { cmdExports } from "./cmdExports.js";
 import { cmdList } from "./cmdList.js";
 import { cmdListMap } from "./cmdListMap.js";
 import { cmdMapPosition } from "./cmdMapPosition.js";
@@ -30,7 +30,7 @@ function showHelp()
 
     console.log("\nCommand:");
     showArgs({
-        "demod": "Combine modules, remove @internals and more...",
+        "exports": "Creates a new .d.ts with just the exports",
         "list": "List the declarations and positions in a .d.ts file",
         "list-map": "List the contents of a .map file",
         "map-position": "Map one or more source positions to original positions",
@@ -57,8 +57,8 @@ while (args.next())
         case null:
             switch (args.readValue())
             {
-                case "demod":
-                    cmdDemod(args.readTail());
+                case "exports":
+                    cmdExports(args.readTail());
                     break;
 
                 case "list":

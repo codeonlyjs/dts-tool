@@ -4,12 +4,19 @@ import { MappedSource } from "./MappedSource.js";
 import { find_bol_ws, find_next_line_ws } from './LineMap.js';
 import { SourceFile } from "./SourceFile.js";
 import { clargs, showArgs } from "@toptensoftware/clargs";
-import { loadOriginalFile, isDeclarationNode, regExpForName } from "./utils.js";
+import { 
+    loadOriginalFile, 
+    isDeclarationNode, 
+    regExpForName, 
+    isExport, 
+    stripQuotes,
+    isPrivateOrInternal
+} from "./utils.js";
 
 
 function showHelp()
 {
-    console.log("\nUsage: npx codeonlyjs/dts-tool demod <dtsfile> <modulename>");
+    console.log("\nUsage: npx codeonlyjs/dts-tool exports <dtsfile> <modulename>");
 
     console.log("\nOptions:");
     showArgs({
@@ -33,11 +40,12 @@ If input file has a source map, new updated map is generated.
 }
 
 
-export function cmdDemod(tail)
+export function cmdExports(tail)
 {
     let inFile = null;
     let outFile = null;
     let moduleName = null;
+    let rootModules = [];
     let stripInternal = false;
 
     let args = clargs(tail);
@@ -51,6 +59,10 @@ export function cmdDemod(tail)
 
             case "strip-internal":
                 stripInternal = args.readBoolValue();
+                break;
+
+            case "module":
+                rootModules.push(args.readValue());
                 break;
 
             case "out":
@@ -104,17 +116,33 @@ export function cmdDemod(tail)
     // Build module list
     let moduleList = buildModuleList(ast);
 
+    // If user didn't specify modules to include, just 
+    // use the last defined one
+    if (rootModules.length == 0)
+        rootModules = [ moduleList[moduleList.length - 1].name ];
+
     // Build module map
     let moduleMap = new Map();
     moduleList.forEach(x => moduleMap.set(x.name, x));
 
+    // Resolve all `export ... from "module"`
+    resolveExportDeclarations();
+
+    // Build initial list of exports
+    let exports = new Set();
+    for (let rm of rootModules)
+    {
+        let mod = getModule(rm);
+        mod?.resolvedExports.forEach(x => exports.add(x))
+    }
+
     // Remove unneeded imports
-    moduleList.forEach(x => removeImports(x));
+    //moduleList.forEach(x => removeImports(x));
 
     // Write new file
     let msOut = new MappedSource();
     msOut.append(`declare module "${moduleName}" {\n`);
-    moduleList.forEach(x => msOut.append(x.mappedSource));
+    Array.from(exports).forEach(x => writeDeclaration(msOut, x));
     msOut.append(`\n}\n`);
     msOut.save(outFile ?? inFile);
 
@@ -207,23 +235,14 @@ export function cmdDemod(tail)
         {
             if (ts.isModuleDeclaration(node))
             {
-                // Get the body text and trim to whole lines
-                let name = node.name.getText(ast);
-                let body = node.body.getText(ast);
-                let trimStart = /^\s*\{\s*/.exec(body);
-                let trimEnd = /\s*\}\s*$/.exec(body);
-                let bodyStart = node.body.pos + trimStart[0].length;
-                let bodyEnd = node.body.end - trimEnd[0].length;
-                bodyStart = find_bol_ws(msIn.source, bodyStart);
-                bodyEnd = find_next_line_ws(msIn.source, bodyEnd);
+                // Get the module name
+                let name = stripQuotes(node.name.getText(ast));
 
                 // Get module
                 let module = {
                     name,
                     node,
-                    bodyStart,
-                    bodyEnd,
-                    mappedSource: msIn.substring(bodyStart, bodyEnd),
+                    exports: getModuleExports(node),
                 }
                 list.push(module);
                 return;
@@ -236,12 +255,160 @@ export function cmdDemod(tail)
         }
     }
 
-    function removeImports(module)
+    function getModuleExports(module)
     {
-        let deletions = [];
-        ts.forEachChild(module.node, walk);
-        deletions.sort((a,b) => b.pos - a.pos);
+        let moduleName = stripQuotes(module.name.getText(ast));
+        let exports = [];
+        ts.forEachChild(module, walk);
+        return exports;
 
+        function walk(node)
+        {
+            if (isExport(node) && node.name)
+            {
+                // Get the declaration name
+                let name = node.name.getText(ast);
+                
+                // Get the immediately preceding comment
+                let startPos = node.getStart(ast);
+                let comments = ts.getLeadingCommentRanges(msIn.source, node.pos);
+                if (comments && comments.length > 0)
+                {
+                    startPos = comments[comments.length - 1].pos;
+                }
+
+                // Work out the full range of text
+                let pos = find_bol_ws(msIn.source, startPos);
+                let end = find_next_line_ws(msIn.source, node.end);
+
+                // Extract it
+                let definition = msIn.substring(pos, end);
+
+                exports.push({
+                    name, 
+                    node,
+                    originalPosition: pos,
+                    definition
+                });
+            }
+            else if (ts.isExportDeclaration(node))
+            {
+                // Get the module name
+                let moduleSpecifier = stripQuotes(node.moduleSpecifier.getText(ast));
+
+                if (node.exportClause)
+                {
+                    symbols = [];
+                    for (let e of node.exportClause.elements)
+                    {
+                        if (e.propertyName)
+                        {
+                            console.error(`Renaming exports not supported, ignoring "${e.getText(ast)}" in ${module.name.getText(ast)}`);
+                        }
+                        exports.push({
+                            name: e.name.getText(ast),
+                            from: moduleSpecifier,
+                        });
+                    }
+                }
+                else
+                {
+                    exports.push({
+                        name: "*",
+                        from: moduleSpecifier
+                    });
+                }
+                // Get the module name
+                return;
+            }
+            if (ts.isModuleBlock(node))
+            {
+                ts.forEachChild(node, walk);
+            }
+        }
+    }
+
+    function getModule(moduleName)
+    {
+        // Get the module
+        let module = moduleMap.get(moduleName);
+        if (!module)
+            module = moduleMap.get(moduleName + "/index");
+        if (!module)
+        {
+            console.error(`unknown module: ${moduleName}, ignored`)
+            return null;
+        }
+        return module;
+    }
+
+    function resolveExportDeclarations()
+    {
+        for (let m of moduleList)
+        {
+            resolveExportDeclarationsForModule(m);
+        }
+    }
+
+    function resolveExportDeclarationsForModule(module)
+    {
+        if (module.resolvedExports)
+            return;
+        module.resolvedExports = []; // prevent re-entry
+
+        let resolvedExports = new Set();
+        for (let e of module.exports)
+        {
+            // Already defined?
+            if (e.definition)
+            {
+                resolvedExports.add(e);
+            }
+            else
+            {
+                // Find definition in another module
+                let importFromModule = getModule(e.from);
+                if (!importFromModule)
+                    continue;
+                
+                // Make sure it's resolved
+                resolveExportDeclarationsForModule(importFromModule);
+
+                if (e.name == "*")
+                {
+                    for (let e of importFromModule.resolvedExports)
+                    {
+                        resolvedExports.add(e);
+                    }
+                }
+                else
+                {
+                    let e = importFromModule.resolveExports.findIndex(x => x.name == e.name);
+                    if (e)
+                    {
+                        resolvedExports.add(e);
+                    }
+                    else
+                    {
+                        console.error(`warning: couldn't find export '${e.name}' in '${e.from}'`);
+                    }
+                }
+            }
+        }
+
+        module.resolvedExports = Array.from(resolvedExports);
+    }
+
+    function writeDeclaration(out, declaration)
+    {
+        // Ignore if internal
+        if (isPrivateOrInternal(ast, declaration.node))
+            return;
+
+        // Clean up the declaration
+        let deletions = [];
+        ts.forEachChild(declaration.node, walk);
+        deletions.sort((a,b) => b.pos - a.pos);
         let prev = null;
         for (let d of deletions)
         {
@@ -250,94 +417,71 @@ export function cmdDemod(tail)
                 throw new Error("overlapping delete ranges");
             prev = d;
 
-            module.mappedSource.delete(
-                d.pos - module.bodyStart,
+            declaration.definition.delete(
+                d.pos - declaration.originalPosition,
                 d.end - d.pos
             );
+        }
+
+        // Write ite
+        out.append(declaration.definition);
+
+        // Delete a node and 1x preceding comment block
+        function deleteNode(node)
+        {
+            let pos = node.getStart(ast);
+            let comments = ts.getLeadingCommentRanges(msIn.source, node.pos);
+            if (comments && comments.length > 0)
+                pos = comments[comments.length-1].pos;
+
+            pos = find_bol_ws(msIn.source, pos);
+            let end = find_next_line_ws(msIn.source, node.end);
+            deletions.push({ pos, end });
         }
     
         function walk(node)
         {
             if (isDeclarationNode(node))
             {
-                // Delete #private fields
-                if (node.name && node.name.getText(ast) == "#private")
+                // Delete #private fields and anything starting with _
+                if (node.name)
                 {
-                    let pos = find_bol_ws(msIn.source, node.getStart(ast));
-                    let end = find_next_line_ws(msIn.source, node.end);
-                    deletions.push({ pos, end });
+                    let name = node.name.getText(ast);
+                    if (name == "#private" || name.startsWith("_"))
+                    {
+                        deleteNode(node);
+                        return;
+                    }
+                }
+
+                // Delete anything marked @internal or @private
+                if (isPrivateOrInternal(ast, node))
+                {
+                    deleteNode(node);
                     return;
                 }
-
-                let comments = ts.getLeadingCommentRanges(msIn.source, node.pos);
-                if (comments)
-                {
-                    // Remove any redundant @callback|@typedef declarations
-                    for (let i=0; i<comments.length - 1; i++)
-                    {
-                        let c = comments[i];
-                        let text = msIn.source.substring(c.pos, c.end);
-                        if (text.match(/@[callback|typedef]/))
-                        {
-                            let pos = find_bol_ws(msIn.source, c.pos);
-                            let end = find_next_line_ws(msIn.source, c.end);
-                            deletions.push({ pos, end });
-                        }
-                    }
-
-                    // Remove internal declarations
-                    if (comments.length && stripInternal)
-                    {
-                        let c = comments[comments.length - 1];
-                        let text = msIn.source.substring(c.pos, c.end);
-                        if (text.match(/@internal/))
-                        {
-                            let pos = find_bol_ws(msIn.source, c.pos);
-                            let end = find_next_line_ws(msIn.source, node.end);
-                            deletions.push({pos, end});
-                            return; // don't recurse deeper into this node
-                        }
-                    }
-                }
             }
-            if (ts.isExportDeclaration(node))
-            {
-                // Remove any: export <anything> from "<known module>"
-                let moduleName = node.moduleSpecifier.getText(ast);
-                if (moduleMap.has(moduleName))
-                {
-                    let pos = find_next_line_ws(msIn.source, node.pos);
-                    let end = find_next_line_ws(msIn.source, node.end);
-                    deletions.push({ pos, end });
-                }
-            }
-            if (ts.isImportDeclaration(node))
-            {
-                // Remove any: import <anything> from "<known module>"
-                let moduleName = node.moduleSpecifier.getText(ast);
-                if (moduleMap.has(moduleName))
-                {
-                    let pos = find_next_line_ws(msIn.source, node.pos);
-                    let end = find_next_line_ws(msIn.source, node.end);
-                    deletions.push({ pos, end });
-                }
-            }
+            
             if (ts.isImportTypeNode(node))
             {
                 // Remove: import(<knownmodule>).
-                let importedModule = node.argument.getText(ast);
-                if (moduleMap.has(importedModule))
+                let importedModule = getModule(stripQuotes(node.argument.getText(ast)));
+                if (importedModule)
                 {
-                    let pos = node.pos;
-                    while (msIn.source[pos] == ' ')
-                        pos++;
-                    let text = msIn.source.substring(pos, node.qualifier.pos);
+                    let typeName = node.qualifier.getText(ast);
+                    if (importedModule.resolvedExports.some(x => x.name == typeName))
+                    {
+                        let pos = node.pos;
+                        while (msIn.source[pos] == ' ')
+                            pos++;
+                        let text = msIn.source.substring(pos, node.qualifier.pos);
 
-                    // Track for deletion
-                    deletions.push({
-                        pos: pos,
-                        end: node.qualifier.pos,
-                    })
+                        // Track for deletion
+                        deletions.push({
+                            pos: pos,
+                            end: node.qualifier.pos,
+                        })
+                    }
                 }
             }
             ts.forEachChild(node, walk);

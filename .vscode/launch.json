@@ -12,7 +12,12 @@
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}\\index.js",
-            "args": [ "demod", "../core/index.d.ts", "@codeonlyjs/core" ]
+            "args": [ 
+                "exports", 
+                "../core/index.raw.d.ts", 
+                "@codeonlyjs/core",
+                "--out:../core/index.d.ts", 
+            ]
 
         }
     ]
