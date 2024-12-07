@@ -64,7 +64,10 @@ export class MappedSource
                 name: m.name
             });
         }
-        fs.writeFileSync(mapfile, JSON.stringify(smg.toJSON(), null, 4), "utf8");
+        let json = smg.toJSON();
+        delete json.sourcesContent;
+        json.names = [];
+        fs.writeFileSync(mapfile, JSON.stringify(json, null, 2), "utf8");
     }
 
     /**

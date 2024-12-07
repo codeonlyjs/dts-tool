@@ -258,9 +258,17 @@ export function cmdDemod(tail)
     
         function walk(node)
         {
-            let nodetext = node.getText(ast);
             if (isDeclarationNode(node))
             {
+                // Delete #private fields
+                if (node.name && node.name.getText(ast) == "#private")
+                {
+                    let pos = find_bol_ws(msIn.source, node.getStart(ast));
+                    let end = find_next_line_ws(msIn.source, node.end);
+                    deletions.push({ pos, end });
+                    return;
+                }
+
                 let comments = ts.getLeadingCommentRanges(msIn.source, node.pos);
                 if (comments)
                 {
