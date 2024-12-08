@@ -16,37 +16,36 @@ import {
 
 function showHelp()
 {
-    console.log("\nUsage: npx codeonlyjs/dts-tool exports <dtsfile> <modulename>");
+    console.log("\nUsage: npx codeonlyjs/dts-tool flatten <dtsfile> <modulename>");
 
     console.log("\nOptions:");
     showArgs({
-        "<dtsfile>": "The input .d.ts file (will be overwritten)",
+        "<dtsfile>": "The input .d.ts file",
         "<moduleName>": "The module name of the resulting collapsed .d.ts file",
-        "--strip-internal": "Strip declarations marked @internal",
+        "--module:<module>": "The name of the module to export (defaults to last in file)",
         "-h, --help":    "Show this help",
     });
 
     console.log(`
-Collapses multiple module definitions in a .d.ts file into 
+Flattens the export definitions in a .d.ts file into 
 single module.  Typical use case is for fixing up the files 
 produced by tsc when extracting the definitions from JS code.
 
 Also removes an self referencing imports, redundant exports,
-unneeded @typedef and @callback comment blocks.  Can also
-remove declarations marked @internal (use --strip-internal).
+unneeded @typedef and @callback comment blocks, @internal and
+private declarations.
 
 If input file has a source map, new updated map is generated.
 `);
 }
 
 
-export function cmdExports(tail)
+export function cmdFlatten(tail)
 {
     let inFile = null;
     let outFile = null;
     let moduleName = null;
     let rootModules = [];
-    let stripInternal = false;
 
     let args = clargs(tail);
     while (args.next())
@@ -56,10 +55,6 @@ export function cmdExports(tail)
             case "help":
                 showHelp();
                 process.exit();
-
-            case "strip-internal":
-                stripInternal = args.readBoolValue();
-                break;
 
             case "module":
                 rootModules.push(args.readValue());

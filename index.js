@@ -3,7 +3,8 @@
 import path from 'node:path';
 import url from 'node:url';
 import { clargs, showPackageVersion, showArgs } from "@toptensoftware/clargs";
-import { cmdExports } from "./cmdExports.js";
+import { cmdFlatten } from "./cmdFlatten.js";
+import { cmdExtract } from "./cmdExtract.js";
 import { cmdList } from "./cmdList.js";
 import { cmdListMap } from "./cmdListMap.js";
 import { cmdMapPosition } from "./cmdMapPosition.js";
@@ -30,7 +31,8 @@ function showHelp()
 
     console.log("\nCommand:");
     showArgs({
-        "exports": "Creates a new .d.ts with just the exports",
+        "flatten": "Flattens the exports of a module",
+        "extract": "Creates .json file describing the file contents",
         "list": "List the declarations and positions in a .d.ts file",
         "list-map": "List the contents of a .map file",
         "map-position": "Map one or more source positions to original positions",
@@ -57,8 +59,12 @@ while (args.next())
         case null:
             switch (args.readValue())
             {
-                case "exports":
-                    cmdExports(args.readTail());
+                case "flatten":
+                    cmdFlatten(args.readTail());
+                    break;
+
+                case "extract":
+                    cmdExtract(args.readTail());
                     break;
 
                 case "list":

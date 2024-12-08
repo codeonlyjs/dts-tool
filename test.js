@@ -24,12 +24,6 @@ test("lineNumbers", () => {
     }
 });
 
-test("load MappedSource", () => {
-
-    let ms = MappedSource.FromSourceFile("index.d.ts");
-    ms.save("dump.d.ts");
-});
-
 test("slice", () => {
 
     let ms = new MappedSource("Hello World!", [

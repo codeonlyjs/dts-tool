@@ -13,10 +13,8 @@
             ],
             "program": "${workspaceFolder}\\index.js",
             "args": [ 
-                "exports", 
-                "../core/index.raw.d.ts", 
-                "@codeonlyjs/core",
-                "--out:../core/index.d.ts", 
+                "extract", 
+                "../core/index.d.ts", 
             ]
 
         }
