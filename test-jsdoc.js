@@ -4,7 +4,10 @@ import {
 parseUnwrapped, unwrap, 
 tokenizeBraces, tokenizer, 
 stripComments, parseJsDocComment,
-parseNameSpecifier
+parseNameSpecifier,
+escapeNamePath,
+parseJsdocInline,
+replaceJsdocInline
 } from "./jsdoc.js";
 
 
@@ -156,11 +159,10 @@ test("tokenizer (string)", () => {
 
 test("tokenizer (braced)", () => {
 
-    let t = tokenizer("{{there\\}}}", 0);
+    let t = tokenizer("{{there}}", 0);
 
-    let str = t.readBraced();
-    assert.equal(str.raw, "{{there\\}}}");
-    assert.equal(str.value, "{there}}");
+    let val = t.readBalanced();
+    assert.equal(val, "{{there}}");
 });
 
 
@@ -222,20 +224,18 @@ as is this
 `,
     });
     assert.deepEqual(sections[1], {
-        kind: "param",
+        block: "param",
         type: "paramType",
-        name: {
-            optional: false,
-            name: "paramName",
-            specifier: "paramName",
-        },
+        optional: false,
+        name: "paramName",
+        specifier: "paramName",
         text: `parameter description
 param desc continued
 `,
     });
 
     assert.deepEqual(sections[2], {
-        kind: "returns",
+        block: "returns",
         type: "retType",
         text: `description
 also continues
@@ -316,5 +316,196 @@ test("tokenize name specifier (multiple props)", () => {
         optional: false,
         name: "foo",
         specifier: "foo.bar.baz"
+    });
+});
+
+test("escape namepath (plain)", () => {
+    assert.equal(escapeNamePath("plain_123$"), "plain_123$");
+});
+
+test("escape namepath (.)", () => {
+    assert.equal(escapeNamePath("23.12"), `"23.12"`);
+});
+
+test("escape namepath (#)", () => {
+    assert.equal(escapeNamePath("elem#id"), `"elem#id"`);
+});
+
+test("escape namepath (\")", () => {
+    assert.equal(escapeNamePath("\"Hello World\""), `"\\\"Hello World\\\""`);
+});
+
+test("parse inline", () => {
+
+    let r = parseJsdocInline("Hello {@link http://localhost/blah World}");
+    assert.deepEqual(r, [
+        {
+            pos: 6,
+            end: 41,
+            kind: "link",
+            namepath: null,
+            url: "http://localhost/blah",
+            title: "World",
+        }
+    ]);
+});
+
+test("parse inline multiple", () => {
+
+    let r = parseJsdocInline("pre {@link prop} between {@link prop2} after");
+    assert.deepEqual(r, [
+        {
+            pos: 4,
+            end: 16,
+            kind: "link",
+            namepath: [
+                { delim: undefined, prefix: undefined, name: "prop" }
+            ],
+            url: null,
+            title: "",
+        },
+        {
+            pos: 25,
+            end: 38,
+            kind: "link",
+            namepath: [
+                { delim: undefined, prefix: undefined, name: "prop2" }
+            ],
+            url: null,
+            title: "",
+        }
+    ]);
+});
+
+test("parse inline module", () => {
+
+    let r = parseJsdocInline("pre {@link module:prop} post");
+    assert.deepEqual(r, [
+        {
+            pos: 4,
+            end: 23,
+            kind: "link",
+            namepath: [
+                { delim: undefined, prefix: "module:", name: "prop" }
+            ],
+            url: null,
+            title: "",
+        },
+    ]);
+});
+
+test("parse inline string", () => {
+
+    let r = parseJsdocInline(`pre {@link "item"} post`);
+    assert.deepEqual(r, [
+        {
+            pos: 4,
+            end: 18,
+            kind: "link",
+            namepath: [
+                { delim: undefined, prefix: undefined, name: "item" }
+            ],
+            url: null,
+            title: "",
+        },
+    ]);
+});
+
+test("parse inline delimited", () => {
+
+    let r = parseJsdocInline(`pre {@link a.b#c~d#event:e} post`);
+    assert.deepEqual(r, [
+        {
+            pos: 4,
+            end: 27,
+            kind: "link",
+            namepath: [
+                { delim: undefined, prefix: undefined, name: "a" },
+                { delim: ".", prefix: undefined, name: "b" },
+                { delim: "#", prefix: undefined, name: "c" },
+                { delim: "~", prefix: undefined, name: "d" },
+                { delim: "#", prefix: "event:", name: "e" }
+            ],
+            url: null,
+            title: "",
+        },
+    ]);
+});
+
+test("parse inline namepath | title", () => {
+
+    let r = parseJsdocInline(`pre {@link a | My Title } post`);
+    assert.deepEqual(r, [
+        {
+            pos: 4,
+            end: 25,
+            kind: "link",
+            namepath: [
+                { delim: undefined, prefix: undefined, name: "a" },
+            ],
+            url: null,
+            title: "My Title",
+        },
+    ]);
+});
+
+test("parse inline namepath title", () => {
+
+    let r = parseJsdocInline(`pre {@link a My Title } post`);
+    assert.deepEqual(r, [
+        {
+            pos: 4,
+            end: 23,
+            kind: "link",
+            namepath: [
+                { delim: undefined, prefix: undefined, name: "a" },
+            ],
+            url: null,
+            title: "My Title",
+        },
+    ]);
+});
+
+test("parse inline namepath|title", () => {
+
+    let r = parseJsdocInline(`pre {@link a|My Title } post`);
+    assert.deepEqual(r, [
+        {
+            pos: 4,
+            end: 23,
+            kind: "link",
+            namepath: [
+                { delim: undefined, prefix: undefined, name: "a" },
+            ],
+            url: null,
+            title: "My Title",
+        },
+    ]);
+});
+
+
+test("parse inline multiple", () => {
+
+    let r = replaceJsdocInline("pre {@link prop} between {@link prop2} after");
+    assert.deepEqual(r, {
+        body: "pre {@link 0} between {@link 1} after",
+        links: [
+            {
+                kind: "link",
+                namepath: [
+                    { delim: undefined, prefix: undefined, name: "prop" }
+                ],
+                url: null,
+                title: "",
+            },
+            {
+                kind: "link",
+                namepath: [
+                    { delim: undefined, prefix: undefined, name: "prop2" }
+                ],
+                url: null,
+                title: "",
+            }
+        ]
     });
 });

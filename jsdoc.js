@@ -220,6 +220,22 @@ export function tokenizer(str, pos)
         return undefined;
     }
 
+    function find(rx)
+    {
+        if (typeof(rx) === 'string')
+            rx = new RegExp(rx, 'y');
+        else if (rx.flags.indexOf('g') < 0)
+            rx = new RegExp(rx.source, rx.flags + "g");
+
+        rx.lastIndex = pos;
+        let rxm = rx.exec(str);
+        if (!rxm)
+            return undefined;
+
+        pos = rxm.index;
+        return rxm;
+    }
+
     function readRegExp(rx)
     {
         if (typeof(rx) === 'string')
@@ -237,6 +253,21 @@ export function tokenizer(str, pos)
         return rxm;
     }
 
+    function match(rx)
+    {
+        if (typeof(rx) === 'string')
+            rx = new RegExp(rx, 'y');
+        else if (rx.flags.indexOf('y') < 0)
+            rx = new RegExp(rx.source, rx.flags + "y");
+        
+        rx.lastIndex = pos;
+        let rxm = rx.exec(str);
+        if (!rxm)
+            return undefined;
+
+        return rxm;
+    }
+
     function readWhitespace()
     {
         return readRegExp(/\s*/y)[0];
@@ -244,7 +275,8 @@ export function tokenizer(str, pos)
 
     function readIdentifier()
     {
-        return readRegExp(/[a-zA-Z_$][a-zA-Z0-9_$]*/y)[0];
+        let id = readRegExp(/[a-zA-Z_$][a-zA-Z0-9_$]*/y);
+        return id ? id[0] : undefined;
     }
 
     function readString()
@@ -387,10 +419,7 @@ export function tokenizer(str, pos)
                 if (stack.length == 0)
                 {
                     pos++;
-                    return {
-                        raw: str.substring(start, pos),
-                        value: value,
-                    }
+                    return str.substring(start, pos);
                 }
             }
 
@@ -448,6 +477,8 @@ export function tokenizer(str, pos)
     }
 
     return {
+        find,
+        match,
         readChar,
         readRegExp,
         readWhitespace,
@@ -603,13 +634,14 @@ export function parseJsDocComment(str)
             {
                 if (t.current == '{')
                 {
-                    section.type = t.readBalanced()?.value;
-                    if (!section.type)
+                    let type = t.readBalanced();
+                    if (!type)
                     {
                         let err = new Error("syntax error parsing JSDoc - missing '}'")
                         err.offset = t.pos;
                         throw err;
                     }
+                    section.type = type.substring(1, type.length - 1);
                     t.readWhitespace();
                 }
             }
@@ -625,4 +657,177 @@ export function parseJsDocComment(str)
 
 //    console.log(JSON.stringify(sections, null, 2));
     return sections;
+}
+
+export function escapeNamePath(name)
+{
+    // Does it have special characters
+    if (!name.match(/[^a-zA-Z0-9_$]/))
+        return name;
+
+    return `"${name.replace(/"/g, "\\\"")}\"`;
+}
+
+/** 
+ * Parses inlines
+ * @param {string} body The body of the comment
+ */
+export function parseJsdocInline(body)
+{
+    let t = tokenizer(body);
+
+    let links = [];
+
+    // {@
+    while (t.find(/\{@/g))
+    {
+        let linkPos = t.pos;
+
+        t.pos += 2;
+
+        // link | linkplain | linkcode
+        let kind = t.readRegExp("link|linkplain|linkcode\b");
+        if (!kind)
+            continue;
+        kind = kind[0];
+
+        // Whitespace
+        t.readWhitespace();
+
+        // Save position
+        let urlPos = t.pos;
+
+        // Try to parse as a namepath
+        let url = undefined;
+        let namepath = [];
+        let delim = undefined;
+        while (true)
+        {
+            // Prefix
+            let prefix = t.readRegExp(/([a-zA-Z]+):/);
+            if (prefix)
+                prefix = prefix[0];
+            else
+                prefix = undefined;
+
+            // Escaped string part?
+            let str = t.readString();
+            if (str)
+            {
+                namepath.push({
+                    prefix,
+                    delim,
+                    name: str.value
+                });
+            }
+            else
+            {
+                // Normal identifier?
+                let id = t.readIdentifier();
+                if (id)
+                    namepath.push({
+                        prefix,
+                        delim,
+                        name: id
+                    });
+                else
+                {
+                    namepath = null;
+                    break;
+                }
+            }
+            
+            // Delimiter
+            delim = t.readRegExp(/[#.~]/y);
+            if (delim)
+            {
+                delim = delim[0];
+                continue;
+            }
+
+            // Space?
+            if (t.match(/[| \t\}]/y))
+                break;
+
+            namepath = null;
+            break;
+        }
+
+        if (namepath == null)
+        {
+            t.pos = urlPos;
+            url = t.readRegExp(/[^ \t\}\|]+/y);
+            if (!url)
+                continue;
+            url = url[0];
+        }
+
+        // Skip optional separator
+        t.readWhitespace();
+        if (t.current == '|')
+            t.pos++;
+        t.readWhitespace();
+
+        // Read title
+        let title = t.readRegExp(/[^\}]*/y);
+        if (title)
+            title = title[0].trim();
+        if (title.length == 0)
+            title = undefined;
+
+        // Skip delimiter
+        if (t.current != '}')
+            continue;
+        t.pos++;
+
+        // Store link
+        links.push({
+            pos: linkPos,
+            end: t.pos,
+            kind,
+            title,
+            url,
+            namepath,
+        });
+    }
+
+    return links;
+}
+
+
+export function replaceJsdocInline(body)
+{
+    let links = parseJsdocInline(body);
+    let buf = "";
+    let pos = 0;
+    for (let i=0; i<links.length; i++)
+    {
+        let l = links[i];
+        if (l.pos > pos)
+            buf += body.substring(pos, l.pos);
+
+        buf += `{@link ${i}}`;
+        pos = l.end;
+    }
+    buf += body.substring(pos);
+
+    return {
+        body: buf,
+        links,
+    }
+}
+
+
+export function formatNamePath(np)
+{
+    let str = "";
+    for (let n of np)
+    {
+        if (n.delimiter)
+            str += n.delimiter;
+        if (n.prefix)
+            str += n.prefix;
+        str += n.name;
+    }
+    return str;
 }

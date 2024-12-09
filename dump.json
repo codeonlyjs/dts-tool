@@ -1,0 +1,2764 @@
+{
+    "kind": "source-file",
+    "members": [
+        {
+            "kind": "module",
+            "name": "@codeonlyjs/core",
+            "namepath": "module:@codeonlyjs/core",
+            "members": [
+                {
+                    "kind": "function",
+                    "name": "setEnvProvider",
+                    "namePath": "module:@codeonlyjs/core.setEnvProvider",
+                    "definition": "export function setEnvProvider(value: () => Environment): void;",
+                    "jsdoc": [
+                        {
+                            "kind": null,
+                            "text": "Sets an environment provider\n"
+                        },
+                        {
+                            "block": "param",
+                            "text": "A callback to provide the current environment object\n",
+                            "type": "() => Environment",
+                            "optional": false,
+                            "name": "value",
+                            "specifier": "value"
+                        },
+                        {
+                            "block": "returns",
+                            "text": "",
+                            "type": "void"
+                        }
+                    ],
+                    "links": []
+                },
+                {
+                    "kind": "class",
+                    "namepath": "module:@codeonlyjs/core.Environment",
+                    "members": [
+                        {
+                            "kind": "property",
+                            "name": "browser",
+                            "namepath": "module:@codeonlyjs/core.Environment#browser",
+                            "definition": "browser: boolean;"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "enterLoading",
+                            "namepath": "module:@codeonlyjs/core.Environment#enterLoading",
+                            "definition": "enterLoading(): void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Notifies the environment that an async load operation is starting\n"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "",
+                                    "type": "void"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "method",
+                            "name": "leaveLoading",
+                            "namepath": "module:@codeonlyjs/core.Environment#leaveLoading",
+                            "definition": "leaveLoading(): void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Notifies the environment that an async load operation has finished\n"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "",
+                                    "type": "void"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "loading",
+                            "members": [
+                                {
+                                    "kind": "get",
+                                    "name": "loading",
+                                    "namepath": "module:@codeonlyjs/core.Environment#loading",
+                                    "definition": "get loading(): boolean;",
+                                    "jsdoc": [
+                                        {
+                                            "kind": null,
+                                            "text": "Indicates if there are async data load operations in progress\n"
+                                        },
+                                        {
+                                            "block": "type",
+                                            "text": "{boolean}\n"
+                                        }
+                                    ],
+                                    "links": []
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "method",
+                            "name": "load",
+                            "namepath": "module:@codeonlyjs/core.Environment#load",
+                            "definition": "load(callback: () => Promise<any>): Promise<any>;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Runs an async data load operation\n"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "A callback that performs the data load\n",
+                                    "type": "() => Promise<any>",
+                                    "optional": false,
+                                    "name": "callback",
+                                    "specifier": "callback"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "",
+                                    "type": "Promise<any>"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "method",
+                            "name": "untilLoaded",
+                            "namepath": "module:@codeonlyjs/core.Environment#untilLoaded",
+                            "definition": "untilLoaded(): Promise<void>;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Returns a promise that resolves when any pending load operation has finished\n"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "",
+                                    "type": "Promise<void>"
+                                }
+                            ],
+                            "links": []
+                        }
+                    ],
+                    "name": "Environment",
+                    "namePath": "module:@codeonlyjs/core.Environment.Environment",
+                    "definition": "export class Environment extends EventTarget {\n    browser: boolean;\n    enterLoading(): void;\n    leaveLoading(): void;\n    get loading(): boolean;\n    load(callback: () => Promise<any>): Promise<any>;\n    untilLoaded(): Promise<void>;\n}",
+                    "jsdoc": [
+                        {
+                            "kind": null,
+                            "text": "The base class for all environment types\n"
+                        },
+                        {
+                            "block": "extends",
+                            "text": "{EventTarget}\n"
+                        }
+                    ],
+                    "links": []
+                },
+                {
+                    "kind": "function",
+                    "name": "html",
+                    "namePath": "module:@codeonlyjs/core.html",
+                    "definition": "export function html(html: string | ((...args: any[]) => string)): HtmlString;",
+                    "jsdoc": [
+                        {
+                            "kind": null,
+                            "text": "Marks a string as being HTML instead of plain text\n\nNormally strings passed to templates are treated as plain text.  Wrapping\na value in html() indicates the string should be treated as HTML instead.\n\n"
+                        },
+                        {
+                            "block": "param",
+                            "text": "The HTML value to be wrapped, or a function that returns a string\n",
+                            "type": "string | (...args: any[]) => string",
+                            "optional": false,
+                            "name": "html",
+                            "specifier": "html"
+                        },
+                        {
+                            "block": "returns",
+                            "text": "",
+                            "type": "HtmlString"
+                        }
+                    ],
+                    "links": []
+                },
+                {
+                    "kind": "class",
+                    "namepath": "module:@codeonlyjs/core.HtmlString",
+                    "members": [
+                        {
+                            "kind": "method",
+                            "static": true,
+                            "name": "areEqual",
+                            "namepath": "module:@codeonlyjs/core.HtmlString.areEqual",
+                            "definition": "static areEqual(a: any, b: any): boolean;"
+                        },
+                        {
+                            "kind": "constructor",
+                            "name": "constructor",
+                            "namepath": "module:@codeonlyjs/core.HtmlString#constructor",
+                            "definition": "constructor(html: string);",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Constructs a new HtmlString object\n"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The HTML string\n",
+                                    "type": "string",
+                                    "optional": false,
+                                    "name": "html",
+                                    "specifier": "html"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "html",
+                            "namepath": "module:@codeonlyjs/core.HtmlString#html",
+                            "definition": "html: string;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "The HTML string\n"
+                                },
+                                {
+                                    "block": "type",
+                                    "text": "{string}\n"
+                                }
+                            ],
+                            "links": []
+                        }
+                    ],
+                    "name": "HtmlString",
+                    "namePath": "module:@codeonlyjs/core.HtmlString.HtmlString",
+                    "definition": "export class HtmlString {\n    static areEqual(a: any, b: any): boolean;\n    constructor(html: string);\n    html: string;\n}",
+                    "jsdoc": [
+                        {
+                            "kind": null,
+                            "text": "Contains a HTML string\n"
+                        }
+                    ],
+                    "links": []
+                },
+                {
+                    "kind": "function",
+                    "name": "css",
+                    "namePath": "module:@codeonlyjs/core.css",
+                    "definition": "export function css(strings: string[], values: string[]): void;",
+                    "jsdoc": [
+                        {
+                            "kind": null,
+                            "text": "Declares a CSS style string to be added to the `<head>` block\n\nThis function is intended to be used as a template literal tag\n"
+                        },
+                        {
+                            "block": "param",
+                            "text": "The CSS to be added\n",
+                            "type": "string[]",
+                            "optional": false,
+                            "name": "strings",
+                            "specifier": "strings"
+                        },
+                        {
+                            "block": "param",
+                            "text": "The interpolated string values\n",
+                            "type": "string[]",
+                            "optional": false,
+                            "name": "values",
+                            "specifier": "values"
+                        },
+                        {
+                            "block": "returns",
+                            "text": "",
+                            "type": "void"
+                        }
+                    ],
+                    "links": []
+                },
+                {
+                    "kind": "class",
+                    "namepath": "module:@codeonlyjs/core.Style",
+                    "members": [
+                        {
+                            "kind": "method",
+                            "static": true,
+                            "name": "declare",
+                            "namepath": "module:@codeonlyjs/core.Style.declare",
+                            "definition": "static declare(css: string): void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Declares a CSS style string to be added to the `<head>` block\n"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The CSS string to be added\n",
+                                    "type": "string",
+                                    "optional": false,
+                                    "name": "css",
+                                    "specifier": "css"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "",
+                                    "type": "void"
+                                }
+                            ],
+                            "links": []
+                        }
+                    ],
+                    "name": "Style",
+                    "namePath": "module:@codeonlyjs/core.Style.Style",
+                    "definition": "export class Style {\n    static declare(css: string): void;\n}",
+                    "jsdoc": [
+                        {
+                            "kind": null,
+                            "text": "Utility functions for working with CSS styles\n"
+                        }
+                    ],
+                    "links": []
+                },
+                {
+                    "kind": "class",
+                    "namepath": "module:@codeonlyjs/core.Component",
+                    "members": [
+                        {
+                            "kind": "property",
+                            "name": "domTreeConstructor",
+                            "static": true,
+                            "members": [
+                                {
+                                    "kind": "get",
+                                    "static": true,
+                                    "name": "domTreeConstructor",
+                                    "namepath": "module:@codeonlyjs/core.Component.domTreeConstructor",
+                                    "definition": "static get domTreeConstructor(): DomTreeConstructor;",
+                                    "jsdoc": [
+                                        {
+                                            "kind": null,
+                                            "text": "Gets the `domTreeConstructor` for this component class.\n\nA `domTreeConstructor` is the constructor function used to\ncreate `domTree` instances for this component class.\n\nThe first time this property is accessed, it calls the\nstatic `onProvideDomTreeConstructor` method to actually provide the\ninstance.\n"
+                                        },
+                                        {
+                                            "block": "type",
+                                            "text": "{import(\"./TemplateCompiler\").DomTreeConstructor}\n"
+                                        }
+                                    ],
+                                    "links": []
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "method",
+                            "static": true,
+                            "name": "onProvideDomTreeConstructor",
+                            "namepath": "module:@codeonlyjs/core.Component.onProvideDomTreeConstructor",
+                            "definition": "static onProvideDomTreeConstructor(): DomTreeConstructor;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Provides the `domTreeConstructor` to be used by this component class.\n\nThis method is only called once per component class and should provide\na constructor function that can create `domTree` instances.\n"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "",
+                                    "type": "import(\"./TemplateCompiler\").DomTreeConstructor"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "method",
+                            "static": true,
+                            "name": "onProvideTemplate",
+                            "namepath": "module:@codeonlyjs/core.Component.onProvideTemplate",
+                            "definition": "static onProvideTemplate(): {};",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Provides the template to be used by this component class.\n\nThis method is only called once per component class and should provide\nthe template to be compiled for this component class\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "isSingleRoot",
+                            "static": true,
+                            "members": [
+                                {
+                                    "kind": "get",
+                                    "static": true,
+                                    "name": "isSingleRoot",
+                                    "namepath": "module:@codeonlyjs/core.Component.isSingleRoot",
+                                    "definition": "static get isSingleRoot(): boolean;",
+                                    "jsdoc": [
+                                        {
+                                            "kind": null,
+                                            "text": "Indicates if instances of this component class will be guaranteed\nto only ever have a single root node\n\n"
+                                        },
+                                        {
+                                            "block": "type",
+                                            "text": "{boolean}\n"
+                                        }
+                                    ],
+                                    "links": []
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "property",
+                            "static": true,
+                            "name": "nextFrameOrder",
+                            "namepath": "module:@codeonlyjs/core.Component.nextFrameOrder",
+                            "definition": "static nextFrameOrder: number;"
+                        },
+                        {
+                            "kind": "property",
+                            "static": true,
+                            "name": "template",
+                            "namepath": "module:@codeonlyjs/core.Component.template",
+                            "definition": "static template: {};",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "The template to be used by this component class "
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "method",
+                            "name": "update",
+                            "namepath": "module:@codeonlyjs/core.Component#update",
+                            "definition": "update(): void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Immediately updates this component's DOM elements - even if\nthe component is not marked as invalid.\n\nDoes nothing if the component's DOM elements haven't been created.\n\nIf the component is marked as invalid, returns it to the valid state.\n\nThis method is implicitly bound to the component instance\nand can be used as an event listener to update the\ncomponent when an event is triggered.\n\n"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "",
+                                    "type": "void"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "method",
+                            "name": "invalidate",
+                            "namepath": "module:@codeonlyjs/core.Component#invalidate",
+                            "definition": "invalidate(): void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Marks this component as requiring a DOM update.\n\nDoes nothing if the component hasn't yet been created.\n\nThis method is implicitly bound to the component instance\nand can be used as an event listener to invalidate the\ncomponent when an event is triggered.\n\n"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "",
+                                    "type": "void"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "method",
+                            "name": "create",
+                            "namepath": "module:@codeonlyjs/core.Component#create",
+                            "definition": "create(): void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Ensures the DOM elements of this component are created.\n\nCalling this method does nothing if the component is already created.\n\n"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "",
+                                    "type": "void"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "created",
+                            "members": [
+                                {
+                                    "kind": "get",
+                                    "name": "created",
+                                    "namepath": "module:@codeonlyjs/core.Component#created",
+                                    "definition": "get created(): boolean;",
+                                    "jsdoc": [
+                                        {
+                                            "kind": null,
+                                            "text": "Returns true if this component's DOM elements have been created\n\n"
+                                        },
+                                        {
+                                            "block": "type",
+                                            "text": "{boolean}\n"
+                                        }
+                                    ],
+                                    "links": []
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "property",
+                            "name": "domTree",
+                            "members": [
+                                {
+                                    "kind": "get",
+                                    "name": "domTree",
+                                    "namepath": "module:@codeonlyjs/core.Component#domTree",
+                                    "definition": "get domTree(): DomTree;",
+                                    "jsdoc": [
+                                        {
+                                            "kind": null,
+                                            "text": "Gets the `domTree` for this component, creating it if necessary\n\n"
+                                        },
+                                        {
+                                            "block": "type",
+                                            "text": "{import(\"./TemplateCompiler\").DomTree}\n"
+                                        }
+                                    ],
+                                    "links": []
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "property",
+                            "name": "isSingleRoot",
+                            "members": [
+                                {
+                                    "kind": "get",
+                                    "name": "isSingleRoot",
+                                    "namepath": "module:@codeonlyjs/core.Component#isSingleRoot",
+                                    "definition": "get isSingleRoot(): boolean;",
+                                    "jsdoc": [
+                                        {
+                                            "kind": null,
+                                            "text": "Returns true if this component instance has, and will only ever\nhave a single root node\n\n"
+                                        },
+                                        {
+                                            "block": "type",
+                                            "text": "{boolean}\n"
+                                        }
+                                    ],
+                                    "links": []
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "property",
+                            "name": "rootNode",
+                            "members": [
+                                {
+                                    "kind": "get",
+                                    "name": "rootNode",
+                                    "namepath": "module:@codeonlyjs/core.Component#rootNode",
+                                    "definition": "get rootNode(): Node;",
+                                    "jsdoc": [
+                                        {
+                                            "kind": null,
+                                            "text": "Returns the single root node of this component (if it is a single\nroot node component)\n\n"
+                                        },
+                                        {
+                                            "block": "type",
+                                            "text": "{Node}\n"
+                                        }
+                                    ],
+                                    "links": []
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "property",
+                            "name": "rootNodes",
+                            "members": [
+                                {
+                                    "kind": "get",
+                                    "name": "rootNodes",
+                                    "namepath": "module:@codeonlyjs/core.Component#rootNodes",
+                                    "definition": "get rootNodes(): Node[];",
+                                    "jsdoc": [
+                                        {
+                                            "kind": null,
+                                            "text": "Returns the root nodes of this element\n\n"
+                                        },
+                                        {
+                                            "block": "type",
+                                            "text": "{Node[]}\n"
+                                        }
+                                    ],
+                                    "links": []
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "property",
+                            "name": "invalid",
+                            "members": [
+                                {
+                                    "kind": "get",
+                                    "name": "invalid",
+                                    "namepath": "module:@codeonlyjs/core.Component#invalid",
+                                    "definition": "get invalid(): boolean;",
+                                    "jsdoc": [
+                                        {
+                                            "kind": null,
+                                            "text": "Indicates if this component is currently marked as invalid\n"
+                                        },
+                                        {
+                                            "block": "type",
+                                            "text": "{boolean}\n"
+                                        }
+                                    ],
+                                    "links": []
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "method",
+                            "name": "validate",
+                            "namepath": "module:@codeonlyjs/core.Component#validate",
+                            "definition": "validate(): void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Updates this component if it's marked as invalid\n\n"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "",
+                                    "type": "void"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "loadError",
+                            "members": [
+                                {
+                                    "kind": "get",
+                                    "name": "loadError",
+                                    "namepath": "module:@codeonlyjs/core.Component#loadError",
+                                    "definition": "get loadError(): Error;",
+                                    "jsdoc": [
+                                        {
+                                            "kind": null,
+                                            "text": "Gets the error object (if any) that was thrown during the last async data {@link 0} operation.\n\n"
+                                        },
+                                        {
+                                            "block": "type",
+                                            "text": "{Error}\n"
+                                        }
+                                    ],
+                                    "links": [
+                                        {
+                                            "pos": 7345,
+                                            "end": 7357,
+                                            "kind": "link",
+                                            "namepath": [
+                                                {
+                                                    "prefix": "module:",
+                                                    "name": "@codeonlyjs/core"
+                                                },
+                                                {
+                                                    "prefix": ".",
+                                                    "name": "load"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "kind": "set",
+                                    "name": "loadError",
+                                    "namepath": "module:@codeonlyjs/core.Component#loadError",
+                                    "definition": "set loadError(value: Error);",
+                                    "jsdoc": [
+                                        {
+                                            "kind": null,
+                                            "text": "Sets the error object associated with the current async data {@link 0} operation.\n"
+                                        }
+                                    ],
+                                    "links": [
+                                        {
+                                            "pos": 7186,
+                                            "end": 7198,
+                                            "kind": "link",
+                                            "namepath": [
+                                                {
+                                                    "prefix": "module:",
+                                                    "name": "@codeonlyjs/core"
+                                                },
+                                                {
+                                                    "prefix": ".",
+                                                    "name": "load"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "property",
+                            "name": "loading",
+                            "members": [
+                                {
+                                    "kind": "get",
+                                    "name": "loading",
+                                    "namepath": "module:@codeonlyjs/core.Component#loading",
+                                    "definition": "get loading(): boolean;",
+                                    "jsdoc": [
+                                        {
+                                            "kind": null,
+                                            "text": "Indicates if the component is currently in an async data {@link 0} operation\n\n"
+                                        },
+                                        {
+                                            "block": "type",
+                                            "text": "{boolean}\n"
+                                        }
+                                    ],
+                                    "links": [
+                                        {
+                                            "pos": 7517,
+                                            "end": 7529,
+                                            "kind": "link",
+                                            "namepath": [
+                                                {
+                                                    "prefix": "module:",
+                                                    "name": "@codeonlyjs/core"
+                                                },
+                                                {
+                                                    "prefix": ".",
+                                                    "name": "load"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "method",
+                            "name": "load",
+                            "namepath": "module:@codeonlyjs/core.Component#load",
+                            "definition": "load(callback: () => any, silent?: boolean): any;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Performs an async data load operation.\n\nThe callback function is typically an async function that performs\na data request.  While in the callback, the {@link 0} property\nwill return `true`.  If the callback throws an error, it will be captured\nto the {@link 1} property.\n\nBefore calling and after returning from the callback, the component is\ninvalidated so visual elements (eg: spinners) can be updated.\n\nIf the silent parameter is `true` the `loading` property isn't set and\nthe component is only invalidated after returning from the callback.\n\n"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The callback to perform the load operation\n",
+                                    "type": "LoadCallback",
+                                    "optional": false,
+                                    "name": "callback",
+                                    "specifier": "callback"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "Whether to perform a silent update\n",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "name": "silent",
+                                    "specifier": "silent"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "The result of the callback\n",
+                                    "type": "any"
+                                }
+                            ],
+                            "links": [
+                                {
+                                    "pos": 7901,
+                                    "end": 7916,
+                                    "kind": "link",
+                                    "namepath": [
+                                        {
+                                            "prefix": "module:",
+                                            "name": "@codeonlyjs/core"
+                                        },
+                                        {
+                                            "prefix": ".",
+                                            "name": "loading"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "pos": 8029,
+                                    "end": 8046,
+                                    "kind": "link",
+                                    "namepath": [
+                                        {
+                                            "prefix": "module:",
+                                            "name": "@codeonlyjs/core"
+                                        },
+                                        {
+                                            "prefix": ".",
+                                            "name": "loadError"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "method",
+                            "name": "destroy",
+                            "namepath": "module:@codeonlyjs/core.Component#destroy",
+                            "definition": "destroy(): void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Destroys this components `domTree` returning it to\nthe constructed but not created state.\n\nA destroyed component can be recreated by remounting it\nor by calling its {@link 0} method.\n\n"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "",
+                                    "type": "void"
+                                }
+                            ],
+                            "links": [
+                                {
+                                    "pos": 8907,
+                                    "end": 8921,
+                                    "kind": "link",
+                                    "namepath": [
+                                        {
+                                            "prefix": "module:",
+                                            "name": "@codeonlyjs/core"
+                                        },
+                                        {
+                                            "prefix": ".",
+                                            "name": "create"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "method",
+                            "name": "onMount",
+                            "namepath": "module:@codeonlyjs/core.Component#onMount",
+                            "definition": "onMount(): void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Notifies a component that is has been mounted\n\nOverride this method to receive the notification.  External\nresources (eg: adding event listeners to external objects) should be\nacquired when the component is mounted.\n\n"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "",
+                                    "type": "void"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "method",
+                            "name": "onUnmount",
+                            "namepath": "module:@codeonlyjs/core.Component#onUnmount",
+                            "definition": "onUnmount(): void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Notifies a component that is has been mounted\n\nOverride this method to receive the notification.  External\nresources (eg: removing event listeners from external objects) should be\nreleased when the component is unmounted.\n\n"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "",
+                                    "type": "void"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "method",
+                            "name": "listen",
+                            "namepath": "module:@codeonlyjs/core.Component#listen",
+                            "definition": "listen(target: EventTarget, event: string, handler?: Function): void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Registers an event listener to be added to an object when\nautomatically when the component is mounted, and removed when\nunmounted\n\n"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The object dispatching the events\n",
+                                    "type": "EventTarget",
+                                    "optional": false,
+                                    "name": "target",
+                                    "specifier": "target"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The event to listen for\n",
+                                    "type": "string",
+                                    "optional": false,
+                                    "name": "event",
+                                    "specifier": "event"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The event listener to add/remove.  If not provided, the component's {@link 0} method is used.\n",
+                                    "type": "Function",
+                                    "optional": true,
+                                    "name": "handler",
+                                    "specifier": "handler"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "",
+                                    "type": "void"
+                                }
+                            ],
+                            "links": [
+                                {
+                                    "pos": 10117,
+                                    "end": 10135,
+                                    "kind": "link",
+                                    "namepath": [
+                                        {
+                                            "prefix": "module:",
+                                            "name": "@codeonlyjs/core"
+                                        },
+                                        {
+                                            "prefix": ".",
+                                            "name": "invalidate"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "method",
+                            "name": "unlisten",
+                            "namepath": "module:@codeonlyjs/core.Component#unlisten",
+                            "definition": "unlisten(target: EventTarget, event: string, handler?: Function): void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Removes an event listener previously registered with {@link 0}\n\n"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The object dispatching the events\n",
+                                    "type": "EventTarget",
+                                    "optional": false,
+                                    "name": "target",
+                                    "specifier": "target"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The event to listen for\n",
+                                    "type": "string",
+                                    "optional": false,
+                                    "name": "event",
+                                    "specifier": "event"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The event listener to add/remove.  If not\nprovided, the component's {@link 1} method is used.\n",
+                                    "type": "Function",
+                                    "optional": true,
+                                    "name": "handler",
+                                    "specifier": "handler"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "",
+                                    "type": "void"
+                                }
+                            ],
+                            "links": [
+                                {
+                                    "pos": 10334,
+                                    "end": 10348,
+                                    "kind": "link",
+                                    "namepath": [
+                                        {
+                                            "prefix": "module:",
+                                            "name": "@codeonlyjs/core"
+                                        },
+                                        {
+                                            "prefix": ".",
+                                            "name": "listen"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "pos": 10608,
+                                    "end": 10626,
+                                    "kind": "link",
+                                    "namepath": [
+                                        {
+                                            "prefix": "module:",
+                                            "name": "@codeonlyjs/core"
+                                        },
+                                        {
+                                            "prefix": ".",
+                                            "name": "invalidate"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "property",
+                            "name": "mounted",
+                            "members": [
+                                {
+                                    "kind": "get",
+                                    "name": "mounted",
+                                    "namepath": "module:@codeonlyjs/core.Component#mounted",
+                                    "definition": "get mounted(): boolean;",
+                                    "jsdoc": [
+                                        {
+                                            "kind": null,
+                                            "text": "Indicates if the component is current mounted.\n\n"
+                                        },
+                                        {
+                                            "block": "type",
+                                            "text": "{boolean}\n"
+                                        }
+                                    ],
+                                    "links": []
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "method",
+                            "name": "setMounted",
+                            "namepath": "module:@codeonlyjs/core.Component#setMounted",
+                            "definition": "setMounted(mounted: any): void;"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "mount",
+                            "namepath": "module:@codeonlyjs/core.Component#mount",
+                            "definition": "mount(el: Element | string): void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Mounts this component against an element in the document.\n\n"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The element or an element selected that specifies where to mount the component\n",
+                                    "type": "Element | string",
+                                    "optional": false,
+                                    "name": "el",
+                                    "specifier": "el"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "",
+                                    "type": "void"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "method",
+                            "name": "unmount",
+                            "namepath": "module:@codeonlyjs/core.Component#unmount",
+                            "definition": "unmount(): void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Unmounts this component\n\n"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "",
+                                    "type": "void"
+                                }
+                            ],
+                            "links": []
+                        }
+                    ],
+                    "name": "Component",
+                    "namePath": "module:@codeonlyjs/core.Component.Component",
+                    "definition": "export class Component extends EventTarget {\n    static get domTreeConstructor(): DomTreeConstructor;\n    static onProvideDomTreeConstructor(): DomTreeConstructor;\n    static onProvideTemplate(): {};\n    static get isSingleRoot(): boolean;\n    static nextFrameOrder: number;\n    static template: {};\n    update(): void;\n    invalidate(): void;\n    create(): void;\n    get created(): boolean;\n    get domTree(): DomTree;\n    get isSingleRoot(): boolean;\n    get rootNode(): Node;\n    get rootNodes(): Node[];\n    get invalid(): boolean;\n    validate(): void;\n    set loadError(value: Error);\n    get loadError(): Error;\n    get loading(): boolean;\n    load(callback: () => any, silent?: boolean): any;\n    destroy(): void;\n    onMount(): void;\n    onUnmount(): void;\n    listen(target: EventTarget, event: string, handler?: Function): void;\n    unlisten(target: EventTarget, event: string, handler?: Function): void;\n    get mounted(): boolean;\n    setMounted(mounted: any): void;\n    mount(el: Element | string): void;\n    unmount(): void;\n}",
+                    "jsdoc": [
+                        {
+                            "kind": null,
+                            "text": "Components are the primary building block for constructing CodeOnly\napplications. They encapsulate program logic, a DOM (aka HTML) template\nand an optional a set of CSS styles.\n\nComponents can be used either in the templates of other components\nor mounted onto the document DOM to appear in a web page.\n"
+                        },
+                        {
+                            "block": "extends",
+                            "text": "EventTarget\n"
+                        }
+                    ],
+                    "links": []
+                },
+                {
+                    "kind": "function",
+                    "name": "compileTemplate",
+                    "namePath": "module:@codeonlyjs/core.compileTemplate",
+                    "definition": "export function compileTemplate(rootTemplate: object, compilerOptions: any): DomTreeConstructor;",
+                    "jsdoc": [
+                        {
+                            "kind": null,
+                            "text": "Compiles a template into a domTreeConstructor function\n"
+                        },
+                        {
+                            "block": "param",
+                            "text": "The template to be compiled\n",
+                            "type": "object",
+                            "optional": false,
+                            "name": "rootTemplate",
+                            "specifier": "rootTemplate"
+                        },
+                        {
+                            "block": "returns",
+                            "text": "",
+                            "type": "DomTreeConstructor"
+                        }
+                    ],
+                    "links": []
+                },
+                {
+                    "kind": "type-alias",
+                    "name": "DomTreeContext",
+                    "namePath": "module:@codeonlyjs/core.DomTreeContext",
+                    "definition": "export type DomTreeContext = {\n    model: object;\n};",
+                    "members": [
+                        {
+                            "kind": "property",
+                            "name": "model",
+                            "namepath": "module:@codeonlyjs/core#model",
+                            "definition": "model: object;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nThe model to be used by the domTree\n"
+                                }
+                            ],
+                            "links": []
+                        }
+                    ]
+                },
+                {
+                    "kind": "type-alias",
+                    "name": "_DomTreeExtend",
+                    "namePath": "module:@codeonlyjs/core._DomTreeExtend",
+                    "definition": "export type _DomTreeExtend = {\n    rebind: () => void;\n};",
+                    "members": [
+                        {
+                            "kind": "property",
+                            "name": "rebind",
+                            "namepath": "module:@codeonlyjs/core#rebind",
+                            "definition": "rebind: () => void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nRebinds the DomTree to a new model object\n"
+                                }
+                            ],
+                            "links": []
+                        }
+                    ]
+                },
+                {
+                    "kind": "type-alias",
+                    "name": "DomTree",
+                    "namePath": "module:@codeonlyjs/core.DomTree",
+                    "definition": "export type DomTree = CLObject & _DomTreeExtend;"
+                },
+                {
+                    "kind": "type-alias",
+                    "name": "DomTreeConstructor",
+                    "namePath": "module:@codeonlyjs/core.DomTreeConstructor",
+                    "definition": "export type DomTreeConstructor = (DomTreeContext: any) => DomTree;"
+                },
+                {
+                    "kind": "function",
+                    "name": "nextFrame",
+                    "namePath": "module:@codeonlyjs/core.nextFrame",
+                    "definition": "export function nextFrame(callback: () => void, order?: number): void;",
+                    "jsdoc": [
+                        {
+                            "kind": null,
+                            "text": "\nInvokes a callback on the next update cycle\n\n"
+                        },
+                        {
+                            "block": "param",
+                            "text": "The callback to be invoked\n",
+                            "type": "() => void",
+                            "optional": false,
+                            "name": "callback",
+                            "specifier": "callback"
+                        },
+                        {
+                            "block": "param",
+                            "text": "The priority of the callback in related to others (lowest first, default 0)\n",
+                            "type": "Number",
+                            "optional": true,
+                            "name": "order",
+                            "specifier": "order"
+                        },
+                        {
+                            "block": "returns",
+                            "text": "",
+                            "type": "void"
+                        }
+                    ],
+                    "links": []
+                },
+                {
+                    "kind": "function",
+                    "name": "postNextFrame",
+                    "namePath": "module:@codeonlyjs/core.postNextFrame",
+                    "definition": "export function postNextFrame(callback: () => void): void;",
+                    "jsdoc": [
+                        {
+                            "kind": null,
+                            "text": "\nInvokes a callback after all other nextFrame callbacks have been invoked, or\nimmediately if there are no pending nextFrame callbacks.\n"
+                        },
+                        {
+                            "block": "param",
+                            "text": "The callback to invoke\n",
+                            "type": "() => void",
+                            "optional": false,
+                            "name": "callback",
+                            "specifier": "callback"
+                        },
+                        {
+                            "block": "returns",
+                            "text": "",
+                            "type": "void"
+                        }
+                    ],
+                    "links": []
+                },
+                {
+                    "kind": "function",
+                    "name": "anyPendingFrames",
+                    "namePath": "module:@codeonlyjs/core.anyPendingFrames",
+                    "definition": "export function anyPendingFrames(): boolean;",
+                    "jsdoc": [
+                        {
+                            "kind": null,
+                            "text": "\nCheck if there are any pending nextFrame callbacks\n"
+                        },
+                        {
+                            "block": "returns",
+                            "text": "",
+                            "type": "boolean"
+                        }
+                    ],
+                    "links": []
+                },
+                {
+                    "kind": "namespace",
+                    "name": "TransitionCss",
+                    "namepath": "module:TransitionCss",
+                    "members": [
+                        {
+                            "kind": "let",
+                            "name": "defaultClassNames",
+                            "namePath": "module:TransitionCss.defaultClassNames",
+                            "definition": "defaultClassNames: {\n           entering: string;\n           \"enter-start\": string;\n           \"enter-end\": string;\n           leaving: string;\n           \"leave-start\": string;\n           \"leave-end\": string;\n       }"
+                        }
+                    ]
+                },
+                {
+                    "kind": "function",
+                    "name": "transition",
+                    "namePath": "module:@codeonlyjs/core.transition",
+                    "definition": "export function transition(options: {\n    value: (model: object, context: object) => any;\n    mode?: string;\n    name?: void;\n    classNames?: object;\n    duration?: number;\n    subtree?: boolean;\n}, ...args: any[]): TransitionHandler;",
+                    "jsdoc": [
+                        {
+                            "kind": null,
+                            "text": "Declares addition settings transition directives\n"
+                        },
+                        {
+                            "block": "param",
+                            "text": "* @param {(model:object, context:object) => any} options.value The value callback that triggers the animation when it changes\n",
+                            "type": "object",
+                            "optional": false,
+                            "name": "options",
+                            "specifier": "options"
+                        },
+                        {
+                            "block": "param",
+                            "text": "Transition order - concurrent, enter-leave or leave-enter\n",
+                            "type": "string",
+                            "optional": true,
+                            "name": "options",
+                            "specifier": "options.mode"
+                        },
+                        {
+                            "block": "param",
+                            "text": "Transition name - used as prefix to CSS class names, default = \"tx\"\n",
+                            "type": "name",
+                            "optional": true,
+                            "name": "options",
+                            "specifier": "options.name"
+                        },
+                        {
+                            "block": "param",
+                            "text": "A map of class name mappings\n",
+                            "type": "object",
+                            "optional": true,
+                            "name": "options",
+                            "specifier": "options.classNames"
+                        },
+                        {
+                            "block": "param",
+                            "text": "The duration of the animation in milliseconds\n",
+                            "type": "number",
+                            "optional": true,
+                            "name": "options",
+                            "specifier": "options.duration"
+                        },
+                        {
+                            "block": "param",
+                            "text": "Whether to monitor the element's sub-trees for animations\n",
+                            "type": "boolean",
+                            "optional": true,
+                            "name": "options",
+                            "specifier": "options.subtree"
+                        },
+                        {
+                            "block": "returns",
+                            "text": "",
+                            "type": "TransitionHandler"
+                        }
+                    ],
+                    "links": []
+                },
+                {
+                    "kind": "type-alias",
+                    "name": "TransitionHandler",
+                    "namePath": "module:@codeonlyjs/core.TransitionHandler",
+                    "definition": "export type TransitionHandler = {\n    enterNodes: (nodes: Node[]) => void;\n    leaveNodes: (nodes: Node[]) => void;\n    onWillEnter: () => void;\n    onDidLeave: () => void;\n    start: () => void;\n    finish: () => void;\n};",
+                    "members": [
+                        {
+                            "kind": "property",
+                            "name": "enterNodes",
+                            "namepath": "module:@codeonlyjs/core#enterNodes",
+                            "definition": "enterNodes: (nodes: Node[]) => void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nRegisters the nodes that will be transitioned in\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "leaveNodes",
+                            "namepath": "module:@codeonlyjs/core#leaveNodes",
+                            "definition": "leaveNodes: (nodes: Node[]) => void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nRegisters the nodes that will be transitioned out\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "onWillEnter",
+                            "namepath": "module:@codeonlyjs/core#onWillEnter",
+                            "definition": "onWillEnter: () => void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nRegisters a callback to be invoked when entry nodes should be added\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "onDidLeave",
+                            "namepath": "module:@codeonlyjs/core#onDidLeave",
+                            "definition": "onDidLeave: () => void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nRegisters callback to be invoked when leaving nodes can be removed\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "start",
+                            "namepath": "module:@codeonlyjs/core#start",
+                            "definition": "start: () => void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nInstructs the TransitionHandler to start the transition\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "finish",
+                            "namepath": "module:@codeonlyjs/core#finish",
+                            "definition": "finish: () => void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nInstructs the TranstitionHandler to cancel any pending transition and complete all callbacks.\n"
+                                }
+                            ],
+                            "links": []
+                        }
+                    ]
+                },
+                {
+                    "kind": "namespace",
+                    "name": "TransitionNone",
+                    "namepath": "module:TransitionNone",
+                    "members": [
+                        {
+                            "kind": "function",
+                            "name": "enterNodes",
+                            "namePath": "module:TransitionNone.enterNodes",
+                            "definition": "function enterNodes(): void;"
+                        },
+                        {
+                            "kind": "function",
+                            "name": "leaveNodes",
+                            "namePath": "module:TransitionNone.leaveNodes",
+                            "definition": "function leaveNodes(): void;"
+                        },
+                        {
+                            "kind": "function",
+                            "name": "onWillEnter",
+                            "namePath": "module:TransitionNone.onWillEnter",
+                            "definition": "function onWillEnter(cb: any): void;"
+                        },
+                        {
+                            "kind": "function",
+                            "name": "onDidLeave",
+                            "namePath": "module:TransitionNone.onDidLeave",
+                            "definition": "function onDidLeave(cb: any): void;"
+                        },
+                        {
+                            "kind": "function",
+                            "name": "start",
+                            "namePath": "module:TransitionNone.start",
+                            "definition": "function start(): void;"
+                        },
+                        {
+                            "kind": "function",
+                            "name": "finish",
+                            "namePath": "module:TransitionNone.finish",
+                            "definition": "function finish(): void;"
+                        }
+                    ]
+                },
+                {
+                    "kind": "function",
+                    "name": "Notify",
+                    "namePath": "module:@codeonlyjs/core.Notify",
+                    "definition": "export function Notify(): {\n    (sourceObject: any, ...args: any[]): void;\n    addEventListener: (sourceObject: any, handler: any) => void;\n    removeEventListener: (sourceObject: any, handler: any) => void;\n};"
+                },
+                {
+                    "kind": "function",
+                    "name": "htmlEncode",
+                    "namePath": "module:@codeonlyjs/core.htmlEncode",
+                    "definition": "export function htmlEncode(str: string): string;",
+                    "jsdoc": [
+                        {
+                            "kind": null,
+                            "text": "Encodes a string to make it safe for use in HTML\n"
+                        },
+                        {
+                            "block": "param",
+                            "text": "The string to encode\n",
+                            "type": "string",
+                            "optional": false,
+                            "name": "str",
+                            "specifier": "str"
+                        },
+                        {
+                            "block": "returns",
+                            "text": "",
+                            "type": "string"
+                        }
+                    ],
+                    "links": []
+                },
+                {
+                    "kind": "function",
+                    "name": "input",
+                    "namePath": "module:@codeonlyjs/core.input",
+                    "definition": "export function input(options: InputOptions): InputHandler;",
+                    "jsdoc": [
+                        {
+                            "kind": null,
+                            "text": "Declares additional settings for input bindings\n"
+                        },
+                        {
+                            "block": "param",
+                            "text": "Additional input options\n",
+                            "type": "InputOptions",
+                            "optional": false,
+                            "name": "options",
+                            "specifier": "options"
+                        },
+                        {
+                            "block": "returns",
+                            "text": "",
+                            "type": "InputHandler"
+                        }
+                    ],
+                    "links": []
+                },
+                {
+                    "kind": "type-alias",
+                    "name": "InputHandler",
+                    "namePath": "module:@codeonlyjs/core.InputHandler",
+                    "definition": "export type InputHandler = object;"
+                },
+                {
+                    "kind": "type-alias",
+                    "name": "InputOptions",
+                    "namePath": "module:@codeonlyjs/core.InputOptions",
+                    "definition": "export type InputOptions = {\n    event: string;\n    prop?: string;\n    target?: string | ((model: object) => string);\n    format?: (value: any) => string;\n    parse?: (value: string) => any;\n    get?: (model: any, context: any) => any;\n    set?: (model: any, value: any, context: any) => void;\n    on_change?: (model: any, event: Event) => any;\n};",
+                    "members": [
+                        {
+                            "kind": "property",
+                            "name": "event",
+                            "namepath": "module:@codeonlyjs/core#event",
+                            "definition": "event: string;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nThe name of the event (usually \"change\" or \"input\") to trigger the input binding\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "prop",
+                            "namepath": "module:@codeonlyjs/core#prop",
+                            "definition": "prop?: string;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nThe name of the property on the target object\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "target",
+                            "namepath": "module:@codeonlyjs/core#target",
+                            "definition": "target?: string | ((model: object) => string);",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nThe target object providing the binding property\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "format",
+                            "namepath": "module:@codeonlyjs/core#format",
+                            "definition": "format?: (value: any) => string;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nFormat the property value into a string for display\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "parse",
+                            "namepath": "module:@codeonlyjs/core#parse",
+                            "definition": "parse?: (value: string) => any;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nParse a display string into a property value\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "get",
+                            "namepath": "module:@codeonlyjs/core#get",
+                            "definition": "get?: (model: any, context: any) => any;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nGet the value of the property\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "set",
+                            "namepath": "module:@codeonlyjs/core#set",
+                            "definition": "set?: (model: any, value: any, context: any) => void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nSet the value of the property\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "on_change",
+                            "namepath": "module:@codeonlyjs/core#on_change",
+                            "definition": "on_change?: (model: any, event: Event) => any;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nA callback to be invoked when the property value is changed by the user\n"
+                                }
+                            ],
+                            "links": []
+                        }
+                    ]
+                },
+                {
+                    "kind": "function",
+                    "name": "urlPattern",
+                    "namePath": "module:@codeonlyjs/core.urlPattern",
+                    "definition": "export function urlPattern(pattern: string): string;",
+                    "jsdoc": [
+                        {
+                            "kind": null,
+                            "text": "Converts a URL pattern string to a regular expression string\n\n"
+                        },
+                        {
+                            "block": "param",
+                            "text": "The URL pattern to be converted to a regular expression\n",
+                            "type": "string",
+                            "optional": false,
+                            "name": "pattern",
+                            "specifier": "pattern"
+                        },
+                        {
+                            "block": "returns",
+                            "text": "",
+                            "type": "string"
+                        }
+                    ],
+                    "links": []
+                },
+                {
+                    "kind": "class",
+                    "namepath": "module:@codeonlyjs/core.PageCache",
+                    "members": [
+                        {
+                            "kind": "constructor",
+                            "name": "constructor",
+                            "namepath": "module:@codeonlyjs/core.PageCache#constructor",
+                            "definition": "constructor(options: {\n    max: number;\n});",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Constructs a new page cache\n"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "Options controlling the cache\n",
+                                    "type": "object",
+                                    "optional": false,
+                                    "name": "options",
+                                    "specifier": "options"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The maximum number of cache entries to keep\n",
+                                    "type": "number",
+                                    "optional": false,
+                                    "name": "options",
+                                    "specifier": "options.max"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "method",
+                            "name": "get",
+                            "namepath": "module:@codeonlyjs/core.PageCache#get",
+                            "definition": "get(key: any, factory: (key: any) => any): any;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Get a cached object from the cache, or create a new one\n"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The key for the page\n",
+                                    "type": "any",
+                                    "optional": false,
+                                    "name": "key",
+                                    "specifier": "key"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "A callback to create the page item if not in the cache\n",
+                                    "type": "(key: any) => any",
+                                    "optional": false,
+                                    "name": "factory",
+                                    "specifier": "factory"
+                                },
+                                {
+                                    "block": "return",
+                                    "text": "",
+                                    "type": "any"
+                                }
+                            ],
+                            "links": []
+                        }
+                    ],
+                    "name": "PageCache",
+                    "namePath": "module:@codeonlyjs/core.PageCache.PageCache",
+                    "definition": "export class PageCache {\n    constructor(options: {\n        max: number;\n    });\n    get(key: any, factory: (key: any) => any): any;\n}",
+                    "jsdoc": [
+                        {
+                            "kind": null,
+                            "text": "Implements a simple MRU cache that can be used to cache Page components for route handlers "
+                        }
+                    ],
+                    "links": []
+                },
+                {
+                    "kind": "class",
+                    "namepath": "module:@codeonlyjs/core.Router",
+                    "members": [
+                        {
+                            "kind": "constructor",
+                            "name": "constructor",
+                            "namepath": "module:@codeonlyjs/core.Router#constructor",
+                            "definition": "constructor(handlers: RouteHandler[]);",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Constructs a new Router instance\n"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "An array of router handlers to initially register\n",
+                                    "type": "RouteHandler[]",
+                                    "optional": false,
+                                    "name": "handlers",
+                                    "specifier": "handlers"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "method",
+                            "name": "start",
+                            "namepath": "module:@codeonlyjs/core.Router#start",
+                            "definition": "start(driver: object): any;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Starts the router, using the specified driver\n"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The router driver to use\n",
+                                    "type": "object",
+                                    "optional": false,
+                                    "name": "driver",
+                                    "specifier": "driver"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "The result returned from the driver's start method\n",
+                                    "type": "any"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "navigate",
+                            "namepath": "module:@codeonlyjs/core.Router#navigate",
+                            "definition": "navigate: any;"
+                        },
+                        {
+                            "kind": "property",
+                            "name": "replace",
+                            "namepath": "module:@codeonlyjs/core.Router#replace",
+                            "definition": "replace: any;"
+                        },
+                        {
+                            "kind": "property",
+                            "name": "back",
+                            "namepath": "module:@codeonlyjs/core.Router#back",
+                            "definition": "back: any;"
+                        },
+                        {
+                            "kind": "property",
+                            "name": "urlMapper",
+                            "namepath": "module:@codeonlyjs/core.Router#urlMapper",
+                            "definition": "urlMapper: any;"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "internalize",
+                            "namepath": "module:@codeonlyjs/core.Router#internalize",
+                            "definition": "internalize(url: URL | string): URL | string;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Internalizes a URL\n"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The URL to internalize\n",
+                                    "type": "URL | string",
+                                    "optional": false,
+                                    "name": "url",
+                                    "specifier": "url"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "",
+                                    "type": " URL | string"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "method",
+                            "name": "externalize",
+                            "namepath": "module:@codeonlyjs/core.Router#externalize",
+                            "definition": "externalize(url: URL | string): URL | string;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Externalizes a URL\n"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The URL to internalize\n",
+                                    "type": "URL | string",
+                                    "optional": false,
+                                    "name": "url",
+                                    "specifier": "url"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "",
+                                    "type": " URL | string"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "current",
+                            "members": [
+                                {
+                                    "kind": "get",
+                                    "name": "current",
+                                    "namepath": "module:@codeonlyjs/core.Router#current",
+                                    "definition": "get current(): Route;",
+                                    "jsdoc": [
+                                        {
+                                            "kind": null,
+                                            "text": "The current route object\n"
+                                        },
+                                        {
+                                            "block": "type",
+                                            "text": "{Route}\n"
+                                        }
+                                    ],
+                                    "links": []
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "property",
+                            "name": "pending",
+                            "members": [
+                                {
+                                    "kind": "get",
+                                    "name": "pending",
+                                    "namepath": "module:@codeonlyjs/core.Router#pending",
+                                    "definition": "get pending(): Route;",
+                                    "jsdoc": [
+                                        {
+                                            "kind": null,
+                                            "text": "The route currently being navigated to\n"
+                                        },
+                                        {
+                                            "block": "type",
+                                            "text": "{Route}\n"
+                                        }
+                                    ],
+                                    "links": []
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "method",
+                            "name": "addEventListener",
+                            "namepath": "module:@codeonlyjs/core.Router#addEventListener",
+                            "definition": "addEventListener(event: string, handler: RouterEventAsync | RouterEventSync): void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Adds an event listener\n\nAvailable events are:\n  - \"mayEnter\", \"mayLeave\" (async, cancellable events)\n  - \"didEnter\" and \"didLeave\" (sync, non-cancellable events)\n  - \"cancel\" (sync, notification only)\n\n"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The event to listen to\n",
+                                    "type": "string",
+                                    "optional": false,
+                                    "name": "event",
+                                    "specifier": "event"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The event handler function\n",
+                                    "type": "RouterEventAsync | RouterEventSync",
+                                    "optional": false,
+                                    "name": "handler",
+                                    "specifier": "handler"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "method",
+                            "name": "removeEventListener",
+                            "namepath": "module:@codeonlyjs/core.Router#removeEventListener",
+                            "definition": "removeEventListener(event: string, handler: RouterEventAsync | RouterEventSync): void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Removes a previously added event handler\n\n"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The event to remove the listener for\n",
+                                    "type": "string",
+                                    "optional": false,
+                                    "name": "event",
+                                    "specifier": "event"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The event handler function to remove\n",
+                                    "type": "RouterEventAsync | RouterEventSync",
+                                    "optional": false,
+                                    "name": "handler",
+                                    "specifier": "handler"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "method",
+                            "name": "register",
+                            "namepath": "module:@codeonlyjs/core.Router#register",
+                            "definition": "register(handlers: RouteHandler | RouteHandler[]): void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Registers one or more route handlers with the router\n"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The handler or handlers to register\n",
+                                    "type": "RouteHandler | RouteHandler[]",
+                                    "optional": false,
+                                    "name": "handlers",
+                                    "specifier": "handlers"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "method",
+                            "name": "revoke",
+                            "namepath": "module:@codeonlyjs/core.Router#revoke",
+                            "definition": "revoke(predicate: RevokeRouteHandlerPredicate): void;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Revoke previously used handlers by matching to a predicate\n"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "Callback passed each route handler, return true to remove\n",
+                                    "type": "RevokeRouteHandlerPredicate",
+                                    "optional": false,
+                                    "name": "predicate",
+                                    "specifier": "predicate"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "captureViewState",
+                            "namepath": "module:@codeonlyjs/core.Router#captureViewState",
+                            "definition": "captureViewState: CaptureViewStateCallback;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "a callback to capture the view state for this route handler's routes\n"
+                                },
+                                {
+                                    "block": "type",
+                                    "text": "{CaptureViewStateCallback}\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "restoreViewState",
+                            "namepath": "module:@codeonlyjs/core.Router#restoreViewState",
+                            "definition": "restoreViewState: RestoreViewStateCallback;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "a callback to restore the view state for this route handler's routes\n"
+                                },
+                                {
+                                    "block": "type",
+                                    "text": "{RestoreViewStateCallback}\n"
+                                }
+                            ],
+                            "links": []
+                        }
+                    ],
+                    "name": "Router",
+                    "namePath": "module:@codeonlyjs/core.Router.Router",
+                    "definition": "export class Router {\n    constructor(handlers: RouteHandler[]);\n    start(driver: object): any;\n    navigate: any;\n    replace: any;\n    back: any;\n    urlMapper: any;\n    internalize(url: URL | string): URL | string;\n    externalize(url: URL | string): URL | string;\n    get current(): Route;\n    get pending(): Route;\n    addEventListener(event: string, handler: RouterEventAsync | RouterEventSync): void;\n    removeEventListener(event: string, handler: RouterEventAsync | RouterEventSync): void;\n    register(handlers: RouteHandler | RouteHandler[]): void;\n    revoke(predicate: RevokeRouteHandlerPredicate): void;\n    captureViewState: CaptureViewStateCallback;\n    restoreViewState: RestoreViewStateCallback;\n}",
+                    "jsdoc": [
+                        {
+                            "kind": null,
+                            "text": "The Router class - handles URL load requests, creating\n route objects using route handlers and firing associated\n events\n"
+                        }
+                    ],
+                    "links": []
+                },
+                {
+                    "kind": "type-alias",
+                    "name": "Route",
+                    "namePath": "module:@codeonlyjs/core.Route",
+                    "definition": "export type Route = {\n    url: URL;\n    state: any;\n    current: boolean;\n    handler: RouteHandler;\n    viewState?: any;\n    page?: any;\n    title?: string;\n};",
+                    "members": [
+                        {
+                            "kind": "property",
+                            "name": "url",
+                            "namepath": "module:@codeonlyjs/core#url",
+                            "definition": "url: URL;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nThe route's URL\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "state",
+                            "namepath": "module:@codeonlyjs/core#state",
+                            "definition": "state: any;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nState associated with the route\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "current",
+                            "namepath": "module:@codeonlyjs/core#current",
+                            "definition": "current: boolean;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nTrue when this is the current route\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "handler",
+                            "namepath": "module:@codeonlyjs/core#handler",
+                            "definition": "handler: RouteHandler;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nThe handler associated with this route\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "viewState",
+                            "namepath": "module:@codeonlyjs/core#viewState",
+                            "definition": "viewState?: any;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nThe route's view state\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "page",
+                            "namepath": "module:@codeonlyjs/core#page",
+                            "definition": "page?: any;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nThe page component for this route\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "title",
+                            "namepath": "module:@codeonlyjs/core#title",
+                            "definition": "title?: string;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nThe route's page title\n"
+                                }
+                            ],
+                            "links": []
+                        }
+                    ]
+                },
+                {
+                    "kind": "type-alias",
+                    "name": "RouteHandler",
+                    "namePath": "module:@codeonlyjs/core.RouteHandler",
+                    "definition": "export type RouteHandler = {\n    pattern?: string | RegExp;\n    match?: MatchCallback;\n    mayEnter?: RouterEventAsync;\n    mayLeave?: RouterEventAsync;\n    didEnter?: RouterEventSync;\n    didLeave?: RouterEventSync;\n    cancelEnter?: RouterEventSync;\n    cancelLeave?: RouterEventSync;\n    order?: number;\n    captureViewState?: CaptureViewStateCallback;\n    restoreViewState?: RestoreViewStateCallback;\n};",
+                    "members": [
+                        {
+                            "kind": "property",
+                            "name": "pattern",
+                            "namepath": "module:@codeonlyjs/core#pattern",
+                            "definition": "pattern?: string | RegExp;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nA string pattern or regular expression to match URL pathnames to this route handler\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "match",
+                            "namepath": "module:@codeonlyjs/core#match",
+                            "definition": "match?: MatchCallback;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nA callback to confirm the URL match\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "mayEnter",
+                            "namepath": "module:@codeonlyjs/core#mayEnter",
+                            "definition": "mayEnter?: RouterEventAsync;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nNotifies that a route for this handler may be entered\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "mayLeave",
+                            "namepath": "module:@codeonlyjs/core#mayLeave",
+                            "definition": "mayLeave?: RouterEventAsync;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nNotifies that a route for this handler may be left\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "didEnter",
+                            "namepath": "module:@codeonlyjs/core#didEnter",
+                            "definition": "didEnter?: RouterEventSync;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nNotifies that a route for this handler has been entered\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "didLeave",
+                            "namepath": "module:@codeonlyjs/core#didLeave",
+                            "definition": "didLeave?: RouterEventSync;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nNotifies that a route for this handler has been left\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "cancelEnter",
+                            "namepath": "module:@codeonlyjs/core#cancelEnter",
+                            "definition": "cancelEnter?: RouterEventSync;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nNotifies that a route that could have been entered was cancelled\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "cancelLeave",
+                            "namepath": "module:@codeonlyjs/core#cancelLeave",
+                            "definition": "cancelLeave?: RouterEventSync;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nNotifies that a route that could have been left was cancelled\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "order",
+                            "namepath": "module:@codeonlyjs/core#order",
+                            "definition": "order?: number;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nOrder of this route handler when compared to all others (default = 0, lowest first)\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "captureViewState",
+                            "namepath": "module:@codeonlyjs/core#captureViewState",
+                            "definition": "captureViewState?: CaptureViewStateCallback;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nA callback to capture the view state for this route handler's routes\n"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "restoreViewState",
+                            "namepath": "module:@codeonlyjs/core#restoreViewState",
+                            "definition": "restoreViewState?: RestoreViewStateCallback;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "\nA callback to restore the view state for this route handler's routes\n"
+                                }
+                            ],
+                            "links": []
+                        }
+                    ]
+                },
+                {
+                    "kind": "type-alias",
+                    "name": "MatchCallback",
+                    "namePath": "module:@codeonlyjs/core.MatchCallback",
+                    "definition": "export type MatchCallback = (route: Route) => Promise<boolean>;"
+                },
+                {
+                    "kind": "type-alias",
+                    "name": "RouterEventAsync",
+                    "namePath": "module:@codeonlyjs/core.RouterEventAsync",
+                    "definition": "export type RouterEventAsync = (from: Route, to: Route) => Promise<boolean>;"
+                },
+                {
+                    "kind": "type-alias",
+                    "name": "RouterEventSync",
+                    "namePath": "module:@codeonlyjs/core.RouterEventSync",
+                    "definition": "export type RouterEventSync = (from: Route, to: Route) => void;"
+                },
+                {
+                    "kind": "type-alias",
+                    "name": "RevokeRouteHandlerPredicate",
+                    "namePath": "module:@codeonlyjs/core.RevokeRouteHandlerPredicate",
+                    "definition": "export type RevokeRouteHandlerPredicate = (handler: RouteHandler) => boolean;"
+                },
+                {
+                    "kind": "type-alias",
+                    "name": "CaptureViewStateCallback",
+                    "namePath": "module:@codeonlyjs/core.CaptureViewStateCallback",
+                    "definition": "export type CaptureViewStateCallback = (route: Route) => any;"
+                },
+                {
+                    "kind": "type-alias",
+                    "name": "RestoreViewStateCallback",
+                    "namePath": "module:@codeonlyjs/core.RestoreViewStateCallback",
+                    "definition": "export type RestoreViewStateCallback = (route: Route, viewState: any) => any;"
+                },
+                {
+                    "kind": "class",
+                    "namepath": "module:@codeonlyjs/core.UrlMapper",
+                    "members": [
+                        {
+                            "kind": "constructor",
+                            "name": "constructor",
+                            "namepath": "module:@codeonlyjs/core.UrlMapper#constructor",
+                            "definition": "constructor(options: {\n    base: string;\n    hash: boolean;\n});",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Constructs a new Url Mapper\n"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "Options for how to map URLs\n",
+                                    "type": "object",
+                                    "optional": false,
+                                    "name": "options",
+                                    "specifier": "options"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The base URL of the external URL\n",
+                                    "type": "string",
+                                    "optional": false,
+                                    "name": "options",
+                                    "specifier": "options.base"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "True to use hashed URLs\n",
+                                    "type": "boolean",
+                                    "optional": false,
+                                    "name": "options",
+                                    "specifier": "options.hash"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "property",
+                            "name": "options",
+                            "namepath": "module:@codeonlyjs/core.UrlMapper#options",
+                            "definition": "options: {\n    base: string;\n    hash: boolean;\n};"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "internalize",
+                            "namepath": "module:@codeonlyjs/core.UrlMapper#internalize",
+                            "definition": "internalize(url: URL): URL;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Internalizes a URL\n\n"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The URL to internalize\n",
+                                    "type": "URL",
+                                    "optional": false,
+                                    "name": "url",
+                                    "specifier": "url"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "",
+                                    "type": "URL"
+                                }
+                            ],
+                            "links": []
+                        },
+                        {
+                            "kind": "method",
+                            "name": "externalize",
+                            "namepath": "module:@codeonlyjs/core.UrlMapper#externalize",
+                            "definition": "externalize(url: URL, asset?: boolean): URL;",
+                            "jsdoc": [
+                                {
+                                    "kind": null,
+                                    "text": "Externalizes a URL\n\n"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "The URL to externalize\n",
+                                    "type": "URL",
+                                    "optional": false,
+                                    "name": "url",
+                                    "specifier": "url"
+                                },
+                                {
+                                    "block": "param",
+                                    "text": "If true, ignores the hash option (used to externalize asset URLs with base only)\n",
+                                    "type": "boolean",
+                                    "optional": true,
+                                    "name": "asset",
+                                    "specifier": "asset"
+                                },
+                                {
+                                    "block": "returns",
+                                    "text": "",
+                                    "type": "URL"
+                                }
+                            ],
+                            "links": []
+                        }
+                    ],
+                    "name": "UrlMapper",
+                    "namePath": "module:@codeonlyjs/core.UrlMapper.UrlMapper",
+                    "definition": "export class UrlMapper {\n    constructor(options: {\n        base: string;\n        hash: boolean;\n    });\n    options: {\n        base: string;\n        hash: boolean;\n    };\n    internalize(url: URL): URL;\n    externalize(url: URL, asset?: boolean): URL;\n}",
+                    "jsdoc": [
+                        {
+                            "kind": null,
+                            "text": "Provides URL internalization and externalization "
+                        }
+                    ],
+                    "links": []
+                },
+                {
+                    "kind": "function",
+                    "name": "fetchTextAsset",
+                    "namePath": "module:@codeonlyjs/core.fetchTextAsset",
+                    "definition": "export function fetchTextAsset(path: string): Promise<string>;",
+                    "jsdoc": [
+                        {
+                            "kind": null,
+                            "text": "Fetches a text asset\n\n In the browser, issues a fetch request for an asset\n On the server, uses fs.readFile to load a local file asset\n\n The asset path must be absolute (start with a '/') and is\n resolved relative to the project root.\n\n"
+                        },
+                        {
+                            "block": "param",
+                            "text": "The path of the asset to fetch\n",
+                            "type": "string",
+                            "optional": false,
+                            "name": "path",
+                            "specifier": "path"
+                        },
+                        {
+                            "block": "returns",
+                            "text": "",
+                            "type": "Promise<string>"
+                        }
+                    ],
+                    "links": []
+                },
+                {
+                    "kind": "function",
+                    "name": "fetchJsonAsset",
+                    "namePath": "module:@codeonlyjs/core.fetchJsonAsset",
+                    "definition": "export function fetchJsonAsset(path: string): Promise<object>;",
+                    "jsdoc": [
+                        {
+                            "kind": null,
+                            "text": "Fetches a JSON asset\n\n In the browser, issues a fetch request for an asset\n On the server, uses fs.readFile to load a local file asset\n\n The asset path must be absolute (start with a '/') and is\n resolved relative to the project root.\n\n"
+                        },
+                        {
+                            "block": "param",
+                            "text": "The path of the asset to fetch\n",
+                            "type": "string",
+                            "optional": false,
+                            "name": "path",
+                            "specifier": "path"
+                        },
+                        {
+                            "block": "returns",
+                            "text": "",
+                            "type": "Promise<object>"
+                        }
+                    ],
+                    "links": []
+                },
+                {
+                    "kind": "class",
+                    "namepath": "module:@codeonlyjs/core.SSRWorker",
+                    "members": [
+                        {
+                            "kind": "method",
+                            "name": "init",
+                            "namepath": "module:@codeonlyjs/core.SSRWorker#init",
+                            "definition": "init(options: any): Promise<void>;"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "stop",
+                            "namepath": "module:@codeonlyjs/core.SSRWorker#stop",
+                            "definition": "stop(): Promise<void>;"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "getStyles",
+                            "namepath": "module:@codeonlyjs/core.SSRWorker#getStyles",
+                            "definition": "getStyles(): Promise<any>;"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "render",
+                            "namepath": "module:@codeonlyjs/core.SSRWorker#render",
+                            "definition": "render(url: any, options: any): Promise<any>;"
+                        }
+                    ],
+                    "name": "SSRWorker",
+                    "namePath": "module:@codeonlyjs/core.SSRWorker.SSRWorker",
+                    "definition": "export class SSRWorker {\n    init(options: any): Promise<void>;\n    stop(): Promise<void>;\n    getStyles(): Promise<any>;\n    render(url: any, options: any): Promise<any>;\n}"
+                },
+                {
+                    "kind": "class",
+                    "namepath": "module:@codeonlyjs/core.SSRWorkerThread",
+                    "members": [
+                        {
+                            "kind": "method",
+                            "name": "init",
+                            "namepath": "module:@codeonlyjs/core.SSRWorkerThread#init",
+                            "definition": "init(options: any): Promise<any>;"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "render",
+                            "namepath": "module:@codeonlyjs/core.SSRWorkerThread#render",
+                            "definition": "render(url: any): Promise<any>;"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "getStyles",
+                            "namepath": "module:@codeonlyjs/core.SSRWorkerThread#getStyles",
+                            "definition": "getStyles(): Promise<any>;"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "stop",
+                            "namepath": "module:@codeonlyjs/core.SSRWorkerThread#stop",
+                            "definition": "stop(): Promise<any>;"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "invoke",
+                            "namepath": "module:@codeonlyjs/core.SSRWorkerThread#invoke",
+                            "definition": "invoke(method: any, ...args: any[]): Promise<any>;"
+                        }
+                    ],
+                    "name": "SSRWorkerThread",
+                    "namePath": "module:@codeonlyjs/core.SSRWorkerThread.SSRWorkerThread",
+                    "definition": "export class SSRWorkerThread {\n    init(options: any): Promise<any>;\n    render(url: any): Promise<any>;\n    getStyles(): Promise<any>;\n    stop(): Promise<any>;\n    invoke(method: any, ...args: any[]): Promise<any>;\n}"
+                },
+                {
+                    "kind": "function",
+                    "name": "generateStatic",
+                    "namePath": "module:@codeonlyjs/core.generateStatic",
+                    "definition": "export function generateStatic(options: {\n    entryFile?: string[];\n    entryMain?: string[];\n    entryHtml?: string[];\n    entryUrls?: string[];\n    ext?: string;\n    pretty?: boolean;\n    outDir?: string;\n    baseUrl?: string;\n    verbose?: boolean;\n    cssUrl?: string;\n}): Promise<{\n    files: any[];\n    elapsed: number;\n}>;",
+                    "jsdoc": [
+                        {
+                            "kind": null,
+                            "text": "Generates a static generated site (SSG)\n\n"
+                        },
+                        {
+                            "block": "param",
+                            "text": "- site generation options\n",
+                            "type": "object",
+                            "optional": false,
+                            "name": "options",
+                            "specifier": "options"
+                        },
+                        {
+                            "block": "param",
+                            "text": "The entry .js file (as an array, first found used)\n",
+                            "type": "string[]",
+                            "optional": true,
+                            "name": "options",
+                            "specifier": "options.entryFile"
+                        },
+                        {
+                            "block": "param",
+                            "text": "The name of the entry point function in the entryFile (as an array, first found used)\n",
+                            "type": "string[]",
+                            "optional": true,
+                            "name": "options",
+                            "specifier": "options.entryMain"
+                        },
+                        {
+                            "block": "param",
+                            "text": "The HTML file to use as template for generated files (as an array, first found used)\n",
+                            "type": "string[]",
+                            "optional": true,
+                            "name": "options",
+                            "specifier": "options.entryHtml"
+                        },
+                        {
+                            "block": "param",
+                            "text": "The URL's to render (will also recursively render all linked URLs)\n",
+                            "type": "string[]",
+                            "optional": true,
+                            "name": "options",
+                            "specifier": "options.entryUrls"
+                        },
+                        {
+                            "block": "param",
+                            "text": "The extension to append to all generated files (including the period)\n",
+                            "type": "string",
+                            "optional": true,
+                            "name": "options",
+                            "specifier": "options.ext"
+                        },
+                        {
+                            "block": "param",
+                            "text": "Prettify the generated HTML\n",
+                            "type": "boolean",
+                            "optional": true,
+                            "name": "options",
+                            "specifier": "options.pretty"
+                        },
+                        {
+                            "block": "param",
+                            "text": "The output directory to write generated files\n",
+                            "type": "string",
+                            "optional": true,
+                            "name": "options",
+                            "specifier": "options.outDir"
+                        },
+                        {
+                            "block": "param",
+                            "text": "The base URL used to qualify in-page URLs to an external full URL\n",
+                            "type": "string",
+                            "optional": true,
+                            "name": "options",
+                            "specifier": "options.baseUrl"
+                        },
+                        {
+                            "block": "param",
+                            "text": "Verbose output\n",
+                            "type": "boolean",
+                            "optional": true,
+                            "name": "options",
+                            "specifier": "options.verbose"
+                        },
+                        {
+                            "block": "param",
+                            "text": "Name of the CSS styles file\n",
+                            "type": "string",
+                            "optional": true,
+                            "name": "options",
+                            "specifier": "options.cssUrl"
+                        }
+                    ],
+                    "links": []
+                },
+                {
+                    "kind": "function",
+                    "name": "viteGenerateStatic",
+                    "namePath": "module:@codeonlyjs/core.viteGenerateStatic",
+                    "definition": "export function viteGenerateStatic(options: any): {\n    name: string;\n    configResolved: (config: any) => void;\n    buildStart: () => Promise<void>;\n    closeBundle: () => Promise<void>;\n};"
+                },
+                {
+                    "kind": "interface",
+                    "namepath": "module:@codeonlyjs/core.CLObject",
+                    "members": [
+                        {
+                            "kind": "property",
+                            "name": "rootNodes",
+                            "members": [
+                                {
+                                    "kind": "get",
+                                    "name": "rootNodes",
+                                    "namepath": "module:@codeonlyjs/core.CLObject#rootNodes",
+                                    "definition": "get rootNodes(): Node[];"
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "method",
+                            "name": "update",
+                            "namepath": "module:@codeonlyjs/core.CLObject#update",
+                            "definition": "update(): void;"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "destroy",
+                            "namepath": "module:@codeonlyjs/core.CLObject#destroy",
+                            "definition": "destroy(): void;"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "setMounted",
+                            "namepath": "module:@codeonlyjs/core.CLObject#setMounted",
+                            "definition": "setMounted(mounted: boolean): void;"
+                        },
+                        {
+                            "kind": "property",
+                            "name": "isSingleRoot",
+                            "namepath": "module:@codeonlyjs/core.CLObject#isSingleRoot",
+                            "definition": "readonly isSingleRoot?: boolean;"
+                        },
+                        {
+                            "kind": "property",
+                            "name": "rootNode",
+                            "namepath": "module:@codeonlyjs/core.CLObject#rootNode",
+                            "definition": "readonly rootNode?: Node;"
+                        }
+                    ],
+                    "name": "CLObject",
+                    "namePath": "module:@codeonlyjs/core.CLObject.CLObject",
+                    "definition": "export interface CLObject \n{\n    get rootNodes(): Node[];\n    update(): void;\n    destroy(): void;\n    setMounted(mounted: boolean): void;\n    readonly isSingleRoot?: boolean;\n    readonly rootNode?: Node;\n}"
+                }
+            ]
+        }
+    ]
+}

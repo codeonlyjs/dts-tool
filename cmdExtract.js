@@ -3,7 +3,7 @@ import ts from 'typescript';
 import { find_bol_ws, find_next_line_ws } from './LineMap.js';
 import { SourceFile } from "./SourceFile.js";
 import { clargs, showArgs } from "@toptensoftware/clargs";
-import { stripComments, parseJsDocComment, trimCommonLeadingSpace } from './jsdoc.js';
+import { stripComments, parseJsDocComment, trimCommonLeadingSpace, replaceJsdocInline, formatNamePath } from './jsdoc.js';
 import { stripQuotes } from "./utils.js";
 
 
@@ -69,10 +69,17 @@ export function cmdExtract(tail)
         true, 
     );
 
-    // Process all statements
-    let helpInfos = ast.statements.map(x => process(x));
+    let namepath = "";
+    let currentModule = "";
+    let allLinks = [];
 
-    let json = JSON.stringify(helpInfos, null, 4);
+    // Process all statements
+    let sourceFile = process(ast);
+
+    // Check links
+    checkLinks();
+
+    let json = JSON.stringify(sourceFile, null, 4);
     if (outFile)
     {
         fs.writeFileSync(outFile, json, "utf8");
@@ -86,6 +93,8 @@ export function cmdExtract(tail)
     {
         switch (node.kind)
         {
+            case ts.SyntaxKind.SourceFile:
+                return processSourceFile(node);
             case ts.SyntaxKind.ModuleDeclaration:
                 return processModule(node);
             case ts.SyntaxKind.FunctionDeclaration:
@@ -118,6 +127,14 @@ export function cmdExtract(tail)
         throw new Error(`Don't know how to process node kind: ${node.kind}`);
     }
 
+    function joinNamePath(name, sep)
+    {
+        if (namepath == "")
+            return name;
+        else
+            return `${namepath}${sep ?? "."}${name}`;
+    }
+
     function postProcessMembers(members)
     {
         for (let i=0; i<members.length; i++)
@@ -132,13 +149,29 @@ export function cmdExtract(tail)
         return members;
     }
 
-    function processModule(node)
+    function processSourceFile(node)
     {
         let x = { 
+            kind: "source-file",
+            members: node.statements.map(x => process(x)),
+        }
+        return x;
+    }
+    function processModule(node)
+    {
+        let saveNamePath = namepath;
+        let name = stripQuotes(node.name.getText(ast));
+        let previousModule = currentModule;
+        currentModule = currentModule == "" ? name : currentModule + "/" + name;
+        namepath = `module:${name}`;
+        let x = { 
             kind: (node.flags & ts.NodeFlags.Namespace) ? "namespace" : "module",
-            name: stripQuotes(node.name.getText(ast)),
+            name,
+            namepath,
             members: postProcessMembers(node.body.statements.map(x => process(x))),
         }
+        namepath = saveNamePath;
+        currentModule = previousModule;
         return x;
     }
 
@@ -146,17 +179,19 @@ export function cmdExtract(tail)
     {
         return Object.assign({
             kind: "function",
-            name: node.name.getText(ast),
         }, processCommon(node));
     }
 
     function processClassOrInterface(node, kind)
     {
+        let saveNamePath = namepath;
+        namepath = joinNamePath(node.name.getText(), ".");
         let x = Object.assign({
             kind,
-            name: node.name.getText(ast),
+            namepath,
             members: postProcessMembers(node.members.map(x => process(x))),
         }, processCommon(node));
+        namepath = saveNamePath;
 
         // Combine get/set accessors
         let props = new Map();
@@ -173,6 +208,7 @@ export function cmdExtract(tail)
                         kind: "property",
                         name: m.name,
                         static: m.static,
+                        members: [],
                     }
                     props.set(key, prop);
                     x.members.splice(i, 0, prop);
@@ -180,29 +216,13 @@ export function cmdExtract(tail)
                 }
 
                 if (m.kind == "get")
-                    prop.getAccessor = m;
+                    prop.members.unshift(m);
                 else
-                    prop.setAccessor = m;
+                    prop.members.push(m);
                 x.members.splice(i, 1);
                 i--;
             }
         }
-
-        /*
-        for (let [k,v] of props)
-        {
-            let def = "";
-            if (v.getAccessor)
-                def += v.getAccessor.definition + "\n";
-            if (v.setAccessor)
-                def += v.setAccessor.definition + "\n";
-            if (v.getAccessor)
-                v.jsdoc = v.getAccessor.jsdoc;
-            if (v.setAccessor && !v.jsdoc)
-                v.jsdoc = v.setAccessor.jsdoc;
-            v.definition = def.trim();
-        }
-        */
 
         return x;
     }
@@ -211,8 +231,7 @@ export function cmdExtract(tail)
     {
         let x = Object.assign({
             kind: "property",
-            name: node.name.getText(ast),
-        }, processCommon(node));
+        }, processCommon(node, true));
         return x;
     }
 
@@ -220,8 +239,7 @@ export function cmdExtract(tail)
     {
         let x = Object.assign({
             kind: "constructor",
-            name: "constructor",
-        }, processCommon(node));
+        }, processCommon(node, true));
         return x;
     }
 
@@ -229,8 +247,7 @@ export function cmdExtract(tail)
     {
         let x = Object.assign({
             kind: "method",
-            name: node.name.getText(ast),
-        }, processCommon(node));
+        }, processCommon(node, true));
         return x;
     }
 
@@ -238,8 +255,7 @@ export function cmdExtract(tail)
     {
         let x = Object.assign({
             kind: "get",
-            name: node.name.getText(ast),
-        }, processCommon(node));
+        }, processCommon(node, true));
         return x;
     }
 
@@ -247,8 +263,7 @@ export function cmdExtract(tail)
     {
         let x = Object.assign({
             kind: "set",
-            name: node.name.getText(ast),
-        }, processCommon(node));
+        }, processCommon(node, true));
         return x;
     }
 
@@ -256,9 +271,7 @@ export function cmdExtract(tail)
     {
         let x = Object.assign({
             kind: "type-alias",
-            name: node.name.getText(ast),
-//            type: process(node.type),
-        }, processCommon(node));
+        }, processCommon(node, false));
 
         if (node.type.members)
         {
@@ -273,8 +286,7 @@ export function cmdExtract(tail)
     {
         let x = Object.assign({
             kind: "property",
-            name: node.name.getText(ast),
-        }, processCommon(node));
+        }, processCommon(node, true));
         return x;
     }
 
@@ -285,7 +297,7 @@ export function cmdExtract(tail)
         let x = Object.assign({
             kind: "variables",
             declarations: node.declarationList.declarations.map(x => process(x)),
-        }, processCommon(node));
+        }, processCommon(node, false));
         return x;
     }
 
@@ -293,12 +305,11 @@ export function cmdExtract(tail)
     {
         let x = Object.assign({
             kind: "let",
-            name: node.name.getText(ast),
-        }, processCommon(node));
+        }, processCommon(node, false));
         return x;
     }
 
-    function processCommon(node)
+    function processCommon(node, isMember)
     {
         let common = {};
 
@@ -307,6 +318,25 @@ export function cmdExtract(tail)
         if (modifiers & ts.ModifierFlags.Static)
         {
             common.static = true;
+        }
+
+        // Get item name
+        if (node.kind == ts.SyntaxKind.Constructor)
+        {
+            common.name = "constructor";
+        }
+        else if (node.name)
+        {
+            common.name = node.name.getText();
+        }
+
+        // Name path
+        if (common.name)
+        {
+            if (isMember)
+                common.namepath = joinNamePath(common.name, common.static ? "." : "#");
+            else
+                common.namePath = joinNamePath(common.name, ".");
         }
 
         // Capture definition
@@ -320,15 +350,44 @@ export function cmdExtract(tail)
         let comments = ts.getLeadingCommentRanges(source.code, node.pos);
         if (comments && comments.length > 0)
         {
+            // Get the immediately preceeding comment block
             let comment = comments[comments.length-1];
+            let commentPos = find_bol_ws(source.code, comment.pos);
             let commentText = source.code.substring(
-                find_bol_ws(source.code, comment.pos),
+                commentPos,
                 find_next_line_ws(source.code, comment.end)
             );
-            common.jsdoc = parseJsDocComment(commentText);
+
+            // Replace inline Jsdoc directives
+            let linked = replaceJsdocInline(commentText);
+            linked.links.forEach(x => {
+
+                // Update link position relative to document
+                x.pos += commentPos;
+                x.end += commentPos;
+
+                // Qualify name paths with the current module name
+                if (x.namepath && x.namepath[0].prefix != "module:")
+                {
+                    x.namepath.unshift({
+                        prefix: "module:",
+                        name: currentModule,
+                    });
+                    x.namepath[1].prefix = ".";
+                }
+
+                // Store link for later checking
+                allLinks.push(x);
+            });
+
+            // Parse JSDoc comments
+            common.jsdoc = parseJsDocComment(linked.body);
+            common.links = linked.links;
+
+            // Track documented
             documented = !!common.jsdoc;
 
-            // Check parameter names match
+            // Display warnings for any parameter documentation mismatches
             if (documented && node.parameters)
             {
                 let parameterNames = node.parameters.map(x => x.name.getText(ast));
@@ -350,6 +409,7 @@ export function cmdExtract(tail)
             }
         }
 
+        // Display a warning if no documentation
         if (!documented)
         {
             let name = node.name?.getText(ast) ?? "<unnamed element>";
@@ -363,6 +423,50 @@ export function cmdExtract(tail)
             let pos = node.getStart(ast);
             let lp = source.lineMap.fromOffset(pos);
             return `${lp.line}:${lp.column}`;
+        }
+    }
+
+    function resolveNamePath(node, namepath)
+    {
+        for (let n of namepath)
+        {
+            if (n.delimiter == "~")
+                return null;
+
+            if (node.members)
+            {
+
+                let subNode = null;
+                for (let m of node.members)
+                {
+                    if (n.prefix == "module:" && m.kind != "module")
+                        continue;
+                    if (n.delimiter == '#' && node.static)
+                        continue;
+                    if (m.name != n.name)
+                        continue;
+                    subNode = m;
+                    break;
+                }
+                if (!subNode)
+                    return null;
+            }
+
+        }
+        return node;
+    }
+
+    function checkLinks()
+    {   
+        for (let l of allLinks)
+        {
+            if (!l.namepath)
+                continue;
+            if (!resolveNamePath(sourceFile, l.namepath))
+            {
+                let lp = source.lineMap.fromOffset(l.pos);
+                console.error(`warning: ${lp.line}:${lp.column}: unresolved namepath: ${formatNamePath(l.namepath)}`);
+            }
         }
     }
 }
