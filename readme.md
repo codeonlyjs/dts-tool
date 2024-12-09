@@ -137,14 +137,14 @@ Start by generating a `.d.ts` file as described above.  Next, feed
 the produced file into `dts-tool`:
 
 ```
-npx codeonlyjs/dts-tool flatten index.d.ts @myscope/mylib --module:index
+npx codeonlyjs/dts-tool flatten @myscope/mylib index.d.ts --module:index
 ```
 
 The three arguments are:
 
-* `index.d.ts` - the file to process (as produced by `tsc`)
 * `@myscope/mylib` - the name of the module to produce (typically 
   the package name of the library)
+* `index.d.ts` - the file to process (as produced by `tsc`)
 * `index` - the name of the root module whose exports are to be
   flattened.
 
@@ -161,6 +161,33 @@ This will:
 * Remove any private and internal declarations
 * Overwrite the original `index.d.ts` with the newly generated
   file.  Use `--out:<file>` to write to a different file
+
+
+## Mixing TypeScript Declarations
+
+If you have additional types that are declared in TypeScript
+that you want to mix in with your JavaScript declared types
+you can pass multiple `.d.ts` files.
+
+eg: suppose you had a file `types.d.ts` that declared additional
+type information not listed in the .js files of the library.
+
+```ts
+declare module "types" {
+    export interface IMyInterface 
+    {
+        // etc...
+    }
+}
+```
+
+The following command could be used merge the `index` module and 
+`types` modules from the two `.d.ts` files into a single `.d.ts`
+file for the package as a whole:
+
+```
+npx codeonlyjs/dts-tool flatten @myscope/mylib index.d.ts types.d.ts --module:index --module:types
+```
 
 
 ## Extracting JSON

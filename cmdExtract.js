@@ -1,8 +1,10 @@
+import fs from 'node:fs';
 import ts from 'typescript';
 import { find_bol_ws, find_next_line_ws } from './LineMap.js';
 import { SourceFile } from "./SourceFile.js";
 import { clargs, showArgs } from "@toptensoftware/clargs";
-import { stripComments, parseJsDocComment } from './jsdoc.js';
+import { stripComments, parseJsDocComment, trimCommonLeadingSpace } from './jsdoc.js';
+import { stripQuotes } from "./utils.js";
 
 
 function showHelp()
@@ -12,6 +14,7 @@ function showHelp()
     console.log("\nOptions:");
     showArgs({
         "<dtsfile>": "The input .d.ts file",
+        "    --out:<file>": "Output file (writes to stdout if not specified)",
         "-h, --help":    "Show this help",
     });
 }
@@ -20,6 +23,7 @@ function showHelp()
 export function cmdExtract(tail)
 {
     let inFile = null;
+    let outFile = null;
 
     let args = clargs(tail);
     while (args.next())
@@ -29,6 +33,10 @@ export function cmdExtract(tail)
             case "help":
                 showHelp();
                 process.exit();
+
+            case "out":
+                outFile = args.readValue();
+                break;
 
             case null:
                 if (inFile == null)
@@ -64,7 +72,15 @@ export function cmdExtract(tail)
     // Process all statements
     let helpInfos = ast.statements.map(x => process(x));
 
-    console.log(JSON.stringify(helpInfos, null, 4));
+    let json = JSON.stringify(helpInfos, null, 4);
+    if (outFile)
+    {
+        fs.writeFileSync(outFile, json, "utf8");
+    }
+    else
+    {
+        console.log(json);
+    }
 
     function process(node)
     {
@@ -75,12 +91,15 @@ export function cmdExtract(tail)
             case ts.SyntaxKind.FunctionDeclaration:
                 return processFunction(node);
             case ts.SyntaxKind.ClassDeclaration:
-                return processClass(node);
+                return processClassOrInterface(node, "class");
+            case ts.SyntaxKind.InterfaceDeclaration:
+                return processClassOrInterface(node, "interface");
             case ts.SyntaxKind.Constructor:
                 return processConstructor(node);
             case ts.SyntaxKind.PropertyDeclaration:
                 return processProperty(node);
             case ts.SyntaxKind.MethodDeclaration:
+            case ts.SyntaxKind.MethodSignature:
                 return processMethod(node);
             case ts.SyntaxKind.GetAccessor:
                 return processGetAccessor(node);
@@ -117,7 +136,7 @@ export function cmdExtract(tail)
     {
         let x = { 
             kind: (node.flags & ts.NodeFlags.Namespace) ? "namespace" : "module",
-            name: node.name.getText(ast),
+            name: stripQuotes(node.name.getText(ast)),
             members: postProcessMembers(node.body.statements.map(x => process(x))),
         }
         return x;
@@ -131,10 +150,10 @@ export function cmdExtract(tail)
         }, processCommon(node));
     }
 
-    function processClass(node)
+    function processClassOrInterface(node, kind)
     {
         let x = Object.assign({
-            kind: "class",
+            kind,
             name: node.name.getText(ast),
             members: postProcessMembers(node.members.map(x => process(x))),
         }, processCommon(node));
@@ -201,6 +220,7 @@ export function cmdExtract(tail)
     {
         let x = Object.assign({
             kind: "constructor",
+            name: "constructor",
         }, processCommon(node));
         return x;
     }
@@ -290,10 +310,10 @@ export function cmdExtract(tail)
         }
 
         // Capture definition
-        common.definition = stripComments(source.code.substring(
+        common.definition = trimCommonLeadingSpace(stripComments(source.code.substring(
             find_bol_ws(source.code, node.getStart(ast)),
             find_next_line_ws(source.code, node.end)
-        )).trim();
+        ))).trimEnd();
 
         // Capture leading comments
         let documented = false;

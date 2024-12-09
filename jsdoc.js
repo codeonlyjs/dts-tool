@@ -1,5 +1,50 @@
 import { find_bol_ws, find_next_line_ws } from "./LineMap.js";
 
+export function trimCommonLeadingSpace(str) {
+
+    // Split the string into lines
+    let lines = str.split('\n');
+
+    let common = null;
+    for (let l of lines)
+    {
+        // Get leading space for this line
+        let linespace = l.match(/^([ \t]*)/);
+        if (!linespace)
+            return str;
+
+        // Ignore completely whitespace lines
+        if (linespace[1].length == l.length)
+            continue;
+
+        if (common == null)
+        {
+            common = linespace[1];
+        }
+        else
+        {
+            for (let i=0; i < common.length; i++)
+            {
+                if (linespace[1][i] != common[i])
+                {
+                    common = common.substring(0, i);
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!common || common.length == 0)
+        return str;
+
+    lines = lines.map(x => x.substring(common.length));
+
+
+    // Join the lines back into a single string
+    return lines.join('\n');
+}
+
+
 export function stripComments(str)
 {
     let rx = /(?:(?:\/\*[\s\S]*?\*\/)|(?:\/\/.*))/g
@@ -505,6 +550,8 @@ export function parseNameSpecifier(t)
 
 export function parseJsDocComment(str)
 {
+    str = trimCommonLeadingSpace(str);
+    
     let end = str.match(/(?:(?:^\s*\*\/)|(?:\*\/))/m);
     if (end < 0)
         return undefined;

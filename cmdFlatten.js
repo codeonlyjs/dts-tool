@@ -5,23 +5,22 @@ import { find_bol_ws, find_next_line_ws } from './LineMap.js';
 import { SourceFile } from "./SourceFile.js";
 import { clargs, showArgs } from "@toptensoftware/clargs";
 import { 
-    loadOriginalFile, 
     isDeclarationNode, 
-    regExpForName, 
     isExport, 
     stripQuotes,
     isPrivateOrInternal
 } from "./utils.js";
+import { createSourceMap } from './sourceMap.js';
 
 
 function showHelp()
 {
-    console.log("\nUsage: npx codeonlyjs/dts-tool flatten <dtsfile> <modulename>");
+    console.log("\nUsage: npx codeonlyjs/dts-tool flatten <modulename> <dtsfile>... ");
 
     console.log("\nOptions:");
     showArgs({
-        "<dtsfile>": "The input .d.ts file",
-        "<moduleName>": "The module name of the resulting collapsed .d.ts file",
+        "<moduleName>": "The module name of the resulting flattened .d.ts file",
+        "<dtsfile>": "The input .d.ts file (or files)",
         "--module:<module>": "The name of the module to export (defaults to last in file)",
         "-h, --help":    "Show this help",
     });
@@ -42,7 +41,7 @@ If input file has a source map, new updated map is generated.
 
 export function cmdFlatten(tail)
 {
-    let inFile = null;
+    let inFiles = [];
     let outFile = null;
     let moduleName = null;
     let rootModules = [];
@@ -65,12 +64,10 @@ export function cmdFlatten(tail)
                 break;
 
             case null:
-                if (inFile == null)
-                    inFile = args.readValue();
-                else if (moduleName == null)
+                if (moduleName == null)
                     moduleName = args.readValue();
                 else
-                    console.error(`Too many arguments: ${args.readValue()}`);
+                    inFiles.push(args.readValue());
                 break;
 
             default:
@@ -79,37 +76,38 @@ export function cmdFlatten(tail)
         }
     }
 
-
-    if (!inFile)
-    {
-        console.error("missing argument: input file");
-        process.exit(7);
-    }
-
     if (!moduleName)
     {
         console.error("missing argument: module name");
         process.exit(7);
     }
-
-    // Read input file
-    let source = SourceFile.fromFile(inFile);
-
-    let relbase = path.dirname(path.resolve(inFile));
     
-    // Parse input file
-    let ast = ts.createSourceFile(
-        inFile, 
-        source.code,
-        ts.ScriptTarget.Latest, 
-        true, 
-    );
+    if (!inFiles.length)
+    {
+        console.error("missing argument: input file");
+        process.exit(7);
+    }
 
-    // Simplify source map
-    let msIn = simplifySourceMap(ast);
+    let moduleList = [];
+    for (let inFile of inFiles)
+    {
+        // Read input file
+        let source = SourceFile.fromFile(inFile);
 
-    // Build module list
-    let moduleList = buildModuleList(ast);
+        // Parse input file
+        let astFile = ts.createSourceFile(
+            inFile, 
+            source.code,
+            ts.ScriptTarget.Latest, 
+            true, 
+        );
+
+        // Simplify source map
+        let ms = createSourceMap(source, astFile);
+
+        // Build module list
+        moduleList.push(...buildModuleList(ms, astFile));
+    }
 
     // If user didn't specify modules to include, just 
     // use the last defined one
@@ -141,86 +139,8 @@ export function cmdFlatten(tail)
     msOut.append(`\n}\n`);
     msOut.save(outFile ?? inFile);
 
-    function simplifySourceMap(ast)
-    {
-        // Create a simplified symbol map with just the 
-        // declared names
 
-        // Start with just the source code
-        let map = [];
-        ts.forEachChild(ast, walk);
-        return new MappedSource(source.code, map);
-
-        function walk(node)
-        {
-            if (isDeclarationNode(node) && node.name && node.kind != ts.SyntaxKind.ModuleDeclaration)
-            {
-                // Get the name and its position
-                let name = node.name.getText(ast);
-                let nameOffset = node.name.getStart(ast);
-
-                // Ignore private fields
-                if (!name.startsWith("#"))
-                {
-                    // Find the original position
-                    let namepos = source.lineMap.fromOffset(nameOffset);
-                    let originalPos = source.sourceMap.originalPositionFor(namepos);
-                    if (originalPos.source)
-                    {
-                        let originalSource = originalPos.source;
-
-                        // Load the original file
-                        let originalSourceFile = loadOriginalFile(path.join(relbase, originalPos.source));
-
-                        // Look for the symbol
-
-                        // Searching from the start of the line instead of the original position column
-                        // helps this works for cases like where name is before the declaration eg:  "{ name: function () }"
-                        // In these cases the originalPos.column is after "name"
-                        let originalOffsetStart = originalSourceFile.lineMap.toOffset(originalPos.line, 0);//originalPos.column);
-
-                        let rx = new RegExp(regExpForName(name), 'g');
-                        rx.lastIndex = originalOffsetStart;
-                        let m = rx.exec(originalSourceFile.code);
-                        if (m)
-                        {
-                            originalOffsetStart = m.index;
-                            originalPos = originalSourceFile.lineMap.fromOffset(originalOffsetStart);
-                            
-                            // Start of name
-                            map.push({
-                                offset: nameOffset,
-                                name: name,
-                                source: originalSource,
-                                originalLine: originalPos.line,
-                                originalColumn: originalPos.column,
-                            });
-
-                            // End of name
-                            map.push({
-                                offset: nameOffset + name.length,
-                                name: name,
-                                source: originalSource,
-                                originalLine: originalPos.line,
-                                originalColumn: originalPos.column + name.length,
-                            });
-                        }
-                        else
-                        {
-                            console.error(`warning: couldn't find original position for '${name}' - ${namepos.line}:${namepos.column}'`);
-                        }
-                    }
-                    else
-                        console.error(`warning: couldn't find original position for '${name}' - ${namepos.line}:${namepos.column} (no original pos)`);
-                }
-            }
-
-            ts.forEachChild(node, walk);
-        }
-
-    }
-
-    function buildModuleList(ast)
+    function buildModuleList(ms, ast)
     {
         let list = [];
         ts.forEachChild(ast, walk);
@@ -237,7 +157,8 @@ export function cmdFlatten(tail)
                 let module = {
                     name,
                     node,
-                    exports: getModuleExports(node),
+                    mappedSource: ms,
+                    exports: getModuleExports(ms, node),
                 }
                 list.push(module);
                 return;
@@ -250,9 +171,8 @@ export function cmdFlatten(tail)
         }
     }
 
-    function getModuleExports(module)
+    function getModuleExports(ms, module)
     {
-        let moduleName = stripQuotes(module.name.getText(ast));
         let exports = [];
         ts.forEachChild(module, walk);
         return exports;
@@ -262,34 +182,35 @@ export function cmdFlatten(tail)
             if (isExport(node) && node.name)
             {
                 // Get the declaration name
-                let name = node.name.getText(ast);
+                let name = node.name.getText();
                 
                 // Get the immediately preceding comment
-                let startPos = node.getStart(ast);
-                let comments = ts.getLeadingCommentRanges(msIn.source, node.pos);
+                let startPos = node.getStart();
+                let comments = ts.getLeadingCommentRanges(ms.source, node.pos);
                 if (comments && comments.length > 0)
                 {
                     startPos = comments[comments.length - 1].pos;
                 }
 
                 // Work out the full range of text
-                let pos = find_bol_ws(msIn.source, startPos);
-                let end = find_next_line_ws(msIn.source, node.end);
+                let pos = find_bol_ws(ms.source, startPos);
+                let end = find_next_line_ws(ms.source, node.end);
 
                 // Extract it
-                let definition = msIn.substring(pos, end);
+                let definition = ms.substring(pos, end);
 
                 exports.push({
                     name, 
                     node,
                     originalPosition: pos,
-                    definition
+                    definition,
+                    mappedSource: ms,
                 });
             }
             else if (ts.isExportDeclaration(node))
             {
                 // Get the module name
-                let moduleSpecifier = stripQuotes(node.moduleSpecifier.getText(ast));
+                let moduleSpecifier = stripQuotes(node.moduleSpecifier.getText());
 
                 if (node.exportClause)
                 {
@@ -298,10 +219,10 @@ export function cmdFlatten(tail)
                     {
                         if (e.propertyName)
                         {
-                            console.error(`Renaming exports not supported, ignoring "${e.getText(ast)}" in ${module.name.getText(ast)}`);
+                            console.error(`Renaming exports not supported, ignoring "${e.getText()}" in ${module.name.getText()}`);
                         }
                         exports.push({
-                            name: e.name.getText(ast),
+                            name: e.name.getText(),
                             from: moduleSpecifier,
                         });
                     }
@@ -397,8 +318,10 @@ export function cmdFlatten(tail)
     function writeDeclaration(out, declaration)
     {
         // Ignore if internal
-        if (isPrivateOrInternal(ast, declaration.node))
+        if (isPrivateOrInternal(declaration.node))
             return;
+
+        let ms = declaration.mappedSource;
 
         // Clean up the declaration
         let deletions = [];
@@ -424,13 +347,13 @@ export function cmdFlatten(tail)
         // Delete a node and 1x preceding comment block
         function deleteNode(node)
         {
-            let pos = node.getStart(ast);
-            let comments = ts.getLeadingCommentRanges(msIn.source, node.pos);
+            let pos = node.getStart();
+            let comments = ts.getLeadingCommentRanges(ms.source, node.pos);
             if (comments && comments.length > 0)
                 pos = comments[comments.length-1].pos;
 
-            pos = find_bol_ws(msIn.source, pos);
-            let end = find_next_line_ws(msIn.source, node.end);
+            pos = find_bol_ws(ms.source, pos);
+            let end = find_next_line_ws(ms.source, node.end);
             deletions.push({ pos, end });
         }
     
@@ -441,7 +364,7 @@ export function cmdFlatten(tail)
                 // Delete #private fields and anything starting with _
                 if (node.name)
                 {
-                    let name = node.name.getText(ast);
+                    let name = node.name.getText();
                     if (name == "#private" || name.startsWith("_"))
                     {
                         deleteNode(node);
@@ -450,7 +373,7 @@ export function cmdFlatten(tail)
                 }
 
                 // Delete anything marked @internal or @private
-                if (isPrivateOrInternal(ast, node))
+                if (isPrivateOrInternal(node))
                 {
                     deleteNode(node);
                     return;
@@ -460,16 +383,16 @@ export function cmdFlatten(tail)
             if (ts.isImportTypeNode(node))
             {
                 // Remove: import(<knownmodule>).
-                let importedModule = getModule(stripQuotes(node.argument.getText(ast)));
+                let importedModule = getModule(stripQuotes(node.argument.getText()));
                 if (importedModule)
                 {
-                    let typeName = node.qualifier.getText(ast);
+                    let typeName = node.qualifier.getText();
                     if (importedModule.resolvedExports.some(x => x.name == typeName))
                     {
                         let pos = node.pos;
-                        while (msIn.source[pos] == ' ')
+                        while (ms.source[pos] == ' ')
                             pos++;
-                        let text = msIn.source.substring(pos, node.qualifier.pos);
+                        let text = ms.source.substring(pos, node.qualifier.pos);
 
                         // Track for deletion
                         deletions.push({

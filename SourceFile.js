@@ -12,11 +12,16 @@ export class SourceFile
 {
     /**
      * Constructs a new SourceFile
+     * @param {string} filename The name of the file this source file was loaded from
      * @param {string} code The code content of the file
      * @param {SourceMapConsumer} sourceMap The loaded and parsed source map for the file
      */
-    constructor(code, sourceMap)
+    constructor(filename, code, sourceMap)
     {
+        /**
+         * The name of the file this source file was loaded from
+         */
+        this.filename = filename;
         /**
          * The code content of the file
          * @type {string}
@@ -38,17 +43,17 @@ export class SourceFile
 
     /**
      * Loads a source file and it's .map file
-     * @param {string} sourceFile Filename of the file to load
+     * @param {string} sourceFileName Filename of the file to load
      * @param {string} mapFile Filename of the .map file to load.  Leave null to use name from source file.
      * @returns {SourceFile}
      */
-    static fromFile(sourceFile, mapFile)
+    static fromFile(sourceFileName, mapFile)
     {
         // Read the source
         let code;
-        if (sourceFile)
+        if (sourceFileName)
         {
-            code = fs.readFileSync(sourceFile, "utf8");
+            code = fs.readFileSync(sourceFileName, "utf8");
         }
 
         // Work out map file
@@ -57,7 +62,7 @@ export class SourceFile
             let mapName = /\/\/# sourceMappingURL=(.*)$/m.exec(code);
             if (mapName)
             {                
-                mapFile = path.join(path.dirname(path.resolve(sourceFile)), mapName[1]);
+                mapFile = path.join(path.dirname(path.resolve(sourceFileName)), mapName[1]);
             }
         }
 
@@ -69,6 +74,6 @@ export class SourceFile
         }
 
         // Create source file
-        return new SourceFile(code, sourceMap);
+        return new SourceFile(sourceFileName, code, sourceMap);
     }
 }
