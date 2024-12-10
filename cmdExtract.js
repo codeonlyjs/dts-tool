@@ -340,7 +340,7 @@ export function cmdExtract(tail)
             if (isMember)
                 common.namepath = joinNamePath(common.name, common.static ? "." : "#");
             else
-                common.namePath = joinNamePath(common.name, ".");
+                common.namepath = joinNamePath(common.name, ".");
         }
 
         // Capture definition
