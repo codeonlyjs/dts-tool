@@ -128,12 +128,20 @@ export function cmdExtract(tail)
         throw new Error(`Don't know how to process node kind: ${node.kind}`);
     }
 
-    function joinNamePath(name, sep)
+    function joinNamePath(base, name, sep)
     {
-        if (namepath == "")
+        if (base == "")
             return name;
         else
-            return `${namepath}${sep ?? "."}${name}`;
+            return `${base}${sep ?? "."}${name}`;
+    }
+
+    function pushNamePath(name, callback)
+    {
+        let old = namepath;
+        namepath = joinNamePath(namepath, name);
+        callback();
+        namepath = old;
     }
 
     function postProcessMembers(members)
@@ -185,14 +193,13 @@ export function cmdExtract(tail)
 
     function processClassOrInterface(node, kind)
     {
-        let saveNamePath = namepath;
-        namepath = joinNamePath(node.name.getText(), ".");
         let x = Object.assign({
             kind,
-            namepath,
-            members: postProcessMembers(node.members.map(x => process(x))),
         }, processCommon(node));
-        namepath = saveNamePath;
+
+        pushNamePath(x.name, () => {
+            x.members = postProcessMembers(node.members.map(x => process(x)));
+        });
 
         // Combine get/set accessors
         let props = new Map();
@@ -274,14 +281,12 @@ export function cmdExtract(tail)
             kind: "type-alias",
         }, processCommon(node, false));
 
-        let saveNamePath = namepath;
-        namepath = joinNamePath(node.name.getText(), ".");
         if (node.type.members)
         {
-            x.members = node.type.members.map(x => process(x));
+            pushNamePath(x.name, () => {
+                x.members = node.type.members.map(x => process(x));
+            });
         }
-        namepath = saveNamePath;
-
 
         return x;
     }
@@ -338,9 +343,9 @@ export function cmdExtract(tail)
         if (common.name)
         {
             if (isMember)
-                common.namepath = joinNamePath(common.name, common.static ? "." : "#");
+                common.namepath = joinNamePath(namepath, common.name, common.static ? "." : "#");
             else
-                common.namepath = joinNamePath(common.name, ".");
+                common.namepath = joinNamePath(namepath, common.name, ".");
         }
 
         // Capture definition

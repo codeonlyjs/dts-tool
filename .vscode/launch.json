@@ -15,7 +15,7 @@
             "args": [ 
                 "extract", 
                 "../core/index.d.ts", 
-                "--out:dump.d.ts",
+                "--out:dump.d.json",
             ]
         }
     ]
