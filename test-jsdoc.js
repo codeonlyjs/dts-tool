@@ -1,123 +1,14 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import { 
-parseUnwrapped, unwrap, 
-tokenizeBraces, tokenizer, 
+tokenizer, 
 stripComments, parseJsDocComment,
 parseNameSpecifier,
-escapeNamePath,
+escapeNamePathElement,
 parseJsdocInline,
 replaceJsdocInline
 } from "./jsdoc.js";
 
-
-test("unwrap", () => {
-
-    let r = unwrap(`    /** this is text
-     * so is this
-     * and this
-     */   `);
-
-    assert.equal(r, `this is text
-so is this
-and this`);
-})
-
-test("skip inline", () => {
-
-    let r = parseUnwrapped(`this is an {@link inline line}`);
-    assert.equal(r[0].name, "description");
-    assert.equal(r[0].text, `this is an {@link inline line}`);
-
-});
-
-test("block", () => {
-
-    let r = parseUnwrapped(`this is the description
-
-@block This is a block
-and so is this
-@block Another block
-`);
-
-    assert.equal(r[0].name, "description");
-    assert.equal(r[0].text, `this is the description\n`);
-    assert.equal(r[1].name, "block");
-    assert.equal(r[1].text, `This is a block\nand so is this`);
-    assert.equal(r[2].name, "block");
-    assert.equal(r[2].text, `Another block\n`);
-});
-
-
-test("tokenize braces (none)", () => {
-
-    let b = tokenizeBraces("Hello World");
-
-    assert.deepEqual(b, [
-        { text: "Hello World" },
-    ]);
-
-});
-
-test("tokenize braces (simple)", () => {
-
-    let b = tokenizeBraces("Hello {there} World");
-
-    assert.deepEqual(b, [
-        { text: "Hello " },
-        { braced: "there" },
-        { text: " World" },
-    ]);
-
-});
-
-test("tokenize braces (nested)", () => {
-
-    let b = tokenizeBraces("Hello {{there}} World");
-
-    assert.deepEqual(b, [
-        { text: "Hello " },
-        { braced: "{there}" },
-        { text: " World" },
-    ]);
-
-});
-
-test("tokenize braces (escaped)", () => {
-
-    let b = tokenizeBraces("Hello {there\\}} World");
-
-    assert.deepEqual(b, [
-        { text: "Hello " },
-        { braced: "there\}" },
-        { text: " World" },
-    ]);
-
-});
-
-test("tokenize braces (quoted)", () => {
-
-    let b = tokenizeBraces("Hello {'th{}ere'} World");
-
-    assert.deepEqual(b, [
-        { text: "Hello " },
-        { braced: "'th{}ere'" },
-        { text: " World" },
-    ]);
-
-});
-
-test("tokenize braces (link)", () => {
-
-    let b = tokenizeBraces("Hello {@link class.member | title} World");
-
-    assert.deepEqual(b, [
-        { text: "Hello " },
-        { braced: "@link class.member | title" },
-        { text: " World" },
-    ]);
-
-});
 
 test("tokenizer (tail)", () => {
 
@@ -320,19 +211,19 @@ test("tokenize name specifier (multiple props)", () => {
 });
 
 test("escape namepath (plain)", () => {
-    assert.equal(escapeNamePath("plain_123$"), "plain_123$");
+    assert.equal(escapeNamePathElement("plain_123$"), "plain_123$");
 });
 
 test("escape namepath (.)", () => {
-    assert.equal(escapeNamePath("23.12"), `"23.12"`);
+    assert.equal(escapeNamePathElement("23.12"), `"23.12"`);
 });
 
 test("escape namepath (#)", () => {
-    assert.equal(escapeNamePath("elem#id"), `"elem#id"`);
+    assert.equal(escapeNamePathElement("elem#id"), `"elem#id"`);
 });
 
 test("escape namepath (\")", () => {
-    assert.equal(escapeNamePath("\"Hello World\""), `"\\\"Hello World\\\""`);
+    assert.equal(escapeNamePathElement("\"Hello World\""), `"\\\"Hello World\\\""`);
 });
 
 test("parse inline", () => {
@@ -361,8 +252,8 @@ test("parse inline multiple", () => {
             namepath: [
                 { delim: undefined, prefix: undefined, name: "prop" }
             ],
-            url: null,
-            title: "",
+            url: undefined,
+            title: undefined,
         },
         {
             pos: 25,
@@ -371,8 +262,8 @@ test("parse inline multiple", () => {
             namepath: [
                 { delim: undefined, prefix: undefined, name: "prop2" }
             ],
-            url: null,
-            title: "",
+            url: undefined,
+            title: undefined,
         }
     ]);
 });
@@ -388,8 +279,8 @@ test("parse inline module", () => {
             namepath: [
                 { delim: undefined, prefix: "module:", name: "prop" }
             ],
-            url: null,
-            title: "",
+            url: undefined,
+            title: undefined,
         },
     ]);
 });
@@ -405,8 +296,8 @@ test("parse inline string", () => {
             namepath: [
                 { delim: undefined, prefix: undefined, name: "item" }
             ],
-            url: null,
-            title: "",
+            url: undefined,
+            title: undefined,
         },
     ]);
 });
@@ -426,8 +317,8 @@ test("parse inline delimited", () => {
                 { delim: "~", prefix: undefined, name: "d" },
                 { delim: "#", prefix: "event:", name: "e" }
             ],
-            url: null,
-            title: "",
+            url: undefined,
+            title: undefined,
         },
     ]);
 });
@@ -443,7 +334,7 @@ test("parse inline namepath | title", () => {
             namepath: [
                 { delim: undefined, prefix: undefined, name: "a" },
             ],
-            url: null,
+            url: undefined,
             title: "My Title",
         },
     ]);
@@ -460,7 +351,7 @@ test("parse inline namepath title", () => {
             namepath: [
                 { delim: undefined, prefix: undefined, name: "a" },
             ],
-            url: null,
+            url: undefined,
             title: "My Title",
         },
     ]);
@@ -477,7 +368,7 @@ test("parse inline namepath|title", () => {
             namepath: [
                 { delim: undefined, prefix: undefined, name: "a" },
             ],
-            url: null,
+            url: undefined,
             title: "My Title",
         },
     ]);
@@ -491,20 +382,24 @@ test("parse inline multiple", () => {
         body: "pre {@link 0} between {@link 1} after",
         links: [
             {
+                pos: 4,
+                end: 16,
                 kind: "link",
                 namepath: [
                     { delim: undefined, prefix: undefined, name: "prop" }
                 ],
-                url: null,
-                title: "",
+                url: undefined,
+                title: undefined,
             },
             {
+                pos: 25,
+                end: 38,
                 kind: "link",
                 namepath: [
                     { delim: undefined, prefix: undefined, name: "prop2" }
                 ],
-                url: null,
-                title: "",
+                url: undefined,
+                title: undefined,
             }
         ]
     });

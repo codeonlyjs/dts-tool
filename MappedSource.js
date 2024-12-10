@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { SourceMapConsumer, SourceMapGenerator } from "@jridgewell/source-map";
-import { LineMap } from "./LineMap.js";
-import { binarySearch } from './binarySearch.js';
+import { binarySearch } from '@toptensoftware/binary-search';
+import { LineMap } from "@toptensoftware/line-map";
 
 /**
  * @typedef MappedPoint

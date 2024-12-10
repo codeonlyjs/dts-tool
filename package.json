@@ -24,6 +24,7 @@
   "dependencies": {
     "@jridgewell/source-map": "^0.3.6",
     "@toptensoftware/clargs": "github:toptensoftware/clargs",
+    "@toptensoftware/line-map": "github:toptensoftware/line-map",
     "typescript": "^5.7.2"
   }
 }

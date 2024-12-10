@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { SourceMapConsumer } from '@jridgewell/source-map';
-import { LineMap } from "./LineMap.js";
+import { LineMap } from "@toptensoftware/line-map";
 
 /**
  * Manages the content of a read-only source file

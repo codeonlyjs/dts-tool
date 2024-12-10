@@ -1,4 +1,4 @@
-import { find_bol_ws, find_next_line_ws } from "./LineMap.js";
+import { find_bol_ws, find_next_line_ws } from "./textUtils.js";
 
 export function trimCommonLeadingSpace(str) {
 
@@ -61,143 +61,6 @@ export function stripComments(str)
         str = str.substring(0, pos) + str.substring(end);
     }
     return str;
-}
-
-export function unwrap(comment)
-{
-    comment = comment.replace(/\r\n/g, "\n");
-    comment = comment.trim();
-    comment = comment.replace(/^\/\*\* ?/, "");
-    comment = comment.replace(/\s*\/*\s*$/, "");
-    comment = comment.replace(/^\s*\* ?/gm, "");
-    return comment.trim();
-}
-
-export function parseUnwrapped(commentText)
-{
-    let lines = commentText.split("\n");
-    let blocks = [];
-    let block = { name: "description", text: ""};
-    blocks.push(block);
-
-    for (let l of lines)
-    {
-        let bm = l.match(/^\s*\@([a-zA-Z0-9]*)\s*(.*)$/);
-        if (bm)
-        {
-            block = { 
-                name: bm[1],
-                text: bm[2],
-            }
-            blocks.push(block);
-        }
-        else
-        {
-            if (block.text.length > 0)
-                block.text += "\n";
-            block.text += l;
-        }
-    }
-    return blocks;
-}
-
-export function skipString(str, from)
-{
-    let start = from;
-
-    if (str[from] != '\"' && str[from] != '\'' && str[from] != '`')
-        return from;
-    
-    let delim = str[from];
-    from++;
-
-    while (from < str.length)
-    {
-        if (str[from] == '\\')
-        {
-            str += 2;
-            continue;
-        }
-        if (str[from] == delim)
-        {
-            from++;
-            return from;
-        }
-        from++;
-    }
-
-    return start;
-}
-
-export function tokenizeBraces(str)
-{
-    let tokens = [];
-    let pos = 0;
-    let len = str.length;
-    let rxBrace = /\{/g;
-    while (pos < len)
-    {
-        rxBrace.lastIndex = pos;
-        let bm = rxBrace.exec(str);
-        if (!bm)
-        {
-            tokens.push({
-                text: str.substring(pos),
-            });
-            return tokens;
-        }
-
-        // Flush text
-        if (bm.index > pos)
-        {
-            tokens.push({ text: str.substring(pos, bm.index) });
-        }
-
-        // Find end of brace
-        pos = bm.index + 1;
-        let start = pos;
-        let depth = 0;
-        let braced = "";
-        while (pos < len)
-        {
-            let eos = skipString(str, pos);
-            if (eos > pos)
-            {
-                braced += str.substring(pos, eos);
-                pos = eos;
-                continue;
-            }
-
-            if (str[pos] == '\\' && str[pos+1] == '}')
-            {
-                braced += "}";
-                pos+=2;
-                continue;
-            }
-
-            if (str[pos] == '{')
-                depth++;
-            if (str[pos] == '}')
-            {
-                if (depth)
-                    depth--;
-                else
-                    break;
-            }
-            braced += str[pos];
-            pos++;
-        }
-
-        if (str[pos] == '}')
-        {
-            tokens.push({ braced });
-            pos++;
-        }
-        else
-        {
-            tokens.push({ text: str.substring(start-1) });
-        }
-    }
 }
 
 const defaultBalancedPairs = {
@@ -659,13 +522,75 @@ export function parseJsDocComment(str)
     return sections;
 }
 
-export function escapeNamePath(name)
+export function escapeNamePathElement(name)
 {
     // Does it have special characters
-    if (!name.match(/[^a-zA-Z0-9_$]/))
+    if (!name.match(/[^a-zA-Z0-9_$@/]/))
         return name;
 
     return `"${name.replace(/"/g, "\\\"")}\"`;
+}
+
+function parseNamePath(t)
+{
+    let start = t.pos;
+    let namepath = [];
+    let delim = undefined;
+    while (true)
+    {
+        // Prefix
+        let prefix = t.readRegExp(/([a-zA-Z]+):/);
+        if (prefix)
+            prefix = prefix[0];
+        else
+            prefix = undefined;
+
+        // Escaped string part?
+        let str = t.readString();
+        if (str)
+        {
+            namepath.push({
+                prefix,
+                delim,
+                name: str.value
+            });
+        }
+        else
+        {
+            // Normal identifier?
+            let id = t.readIdentifier();
+            if (id)
+            {
+                namepath.push({
+                    prefix,
+                    delim,
+                    name: id
+                });
+            }
+            else
+            {
+                break;
+            }
+        }
+        
+        // Delimiter
+        delim = t.readRegExp(/[#.~]/y);
+        if (delim)
+        {
+            delim = delim[0];
+            continue;
+        }
+
+        // End of name path?
+        if (t.match(/[| \t\}]/y))
+            return namepath;
+
+        // Unknown, not a name path
+        break;
+    }
+
+    t.pos = start;
+    return null;
 }
 
 /** 
@@ -694,68 +619,11 @@ export function parseJsdocInline(body)
         // Whitespace
         t.readWhitespace();
 
-        // Save position
-        let urlPos = t.pos;
-
         // Try to parse as a namepath
         let url = undefined;
-        let namepath = [];
-        let delim = undefined;
-        while (true)
+        let namepath = parseNamePath(t);
+        if (!namepath)
         {
-            // Prefix
-            let prefix = t.readRegExp(/([a-zA-Z]+):/);
-            if (prefix)
-                prefix = prefix[0];
-            else
-                prefix = undefined;
-
-            // Escaped string part?
-            let str = t.readString();
-            if (str)
-            {
-                namepath.push({
-                    prefix,
-                    delim,
-                    name: str.value
-                });
-            }
-            else
-            {
-                // Normal identifier?
-                let id = t.readIdentifier();
-                if (id)
-                    namepath.push({
-                        prefix,
-                        delim,
-                        name: id
-                    });
-                else
-                {
-                    namepath = null;
-                    break;
-                }
-            }
-            
-            // Delimiter
-            delim = t.readRegExp(/[#.~]/y);
-            if (delim)
-            {
-                delim = delim[0];
-                continue;
-            }
-
-            // Space?
-            if (t.match(/[| \t\}]/y))
-                break;
-
-            namepath = null;
-            break;
-        }
-
-        if (namepath == null)
-        {
-            t.pos = urlPos;
             url = t.readRegExp(/[^ \t\}\|]+/y);
             if (!url)
                 continue;
@@ -827,7 +695,7 @@ export function formatNamePath(np)
             str += n.delimiter;
         if (n.prefix)
             str += n.prefix;
-        str += n.name;
+        str += escapeNamePathElement(n.name);
     }
     return str;
 }

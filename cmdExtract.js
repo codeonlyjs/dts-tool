@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import ts from 'typescript';
-import { find_bol_ws, find_next_line_ws } from './LineMap.js';
+import { find_bol_ws, find_next_line_ws } from './textUtils.js';
 import { SourceFile } from "./SourceFile.js";
 import { clargs, showArgs } from "@toptensoftware/clargs";
 import { stripComments, parseJsDocComment, trimCommonLeadingSpace, replaceJsdocInline, formatNamePath } from './jsdoc.js';
@@ -467,6 +467,7 @@ export function cmdExtract(tail)
                 let lp = source.lineMap.fromOffset(l.pos);
                 console.error(`warning: ${lp.line}:${lp.column}: unresolved namepath: ${formatNamePath(l.namepath)}`);
             }
+            l.namepath = formatNamePath(l.namepath);
         }
     }
 }

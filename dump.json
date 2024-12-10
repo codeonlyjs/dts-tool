@@ -667,16 +667,7 @@
                                             "pos": 7345,
                                             "end": 7357,
                                             "kind": "link",
-                                            "namepath": [
-                                                {
-                                                    "prefix": "module:",
-                                                    "name": "@codeonlyjs/core"
-                                                },
-                                                {
-                                                    "prefix": ".",
-                                                    "name": "load"
-                                                }
-                                            ]
+                                            "namepath": "module:@codeonlyjs/core.load"
                                         }
                                     ]
                                 },
@@ -696,16 +687,7 @@
                                             "pos": 7186,
                                             "end": 7198,
                                             "kind": "link",
-                                            "namepath": [
-                                                {
-                                                    "prefix": "module:",
-                                                    "name": "@codeonlyjs/core"
-                                                },
-                                                {
-                                                    "prefix": ".",
-                                                    "name": "load"
-                                                }
-                                            ]
+                                            "namepath": "module:@codeonlyjs/core.load"
                                         }
                                     ]
                                 }
@@ -735,16 +717,7 @@
                                             "pos": 7517,
                                             "end": 7529,
                                             "kind": "link",
-                                            "namepath": [
-                                                {
-                                                    "prefix": "module:",
-                                                    "name": "@codeonlyjs/core"
-                                                },
-                                                {
-                                                    "prefix": ".",
-                                                    "name": "load"
-                                                }
-                                            ]
+                                            "namepath": "module:@codeonlyjs/core.load"
                                         }
                                     ]
                                 }
@@ -787,31 +760,13 @@
                                     "pos": 7901,
                                     "end": 7916,
                                     "kind": "link",
-                                    "namepath": [
-                                        {
-                                            "prefix": "module:",
-                                            "name": "@codeonlyjs/core"
-                                        },
-                                        {
-                                            "prefix": ".",
-                                            "name": "loading"
-                                        }
-                                    ]
+                                    "namepath": "module:@codeonlyjs/core.loading"
                                 },
                                 {
                                     "pos": 8029,
                                     "end": 8046,
                                     "kind": "link",
-                                    "namepath": [
-                                        {
-                                            "prefix": "module:",
-                                            "name": "@codeonlyjs/core"
-                                        },
-                                        {
-                                            "prefix": ".",
-                                            "name": "loadError"
-                                        }
-                                    ]
+                                    "namepath": "module:@codeonlyjs/core.loadError"
                                 }
                             ]
                         },
@@ -836,16 +791,7 @@
                                     "pos": 8907,
                                     "end": 8921,
                                     "kind": "link",
-                                    "namepath": [
-                                        {
-                                            "prefix": "module:",
-                                            "name": "@codeonlyjs/core"
-                                        },
-                                        {
-                                            "prefix": ".",
-                                            "name": "create"
-                                        }
-                                    ]
+                                    "namepath": "module:@codeonlyjs/core.create"
                                 }
                             ]
                         },
@@ -930,16 +876,7 @@
                                     "pos": 10117,
                                     "end": 10135,
                                     "kind": "link",
-                                    "namepath": [
-                                        {
-                                            "prefix": "module:",
-                                            "name": "@codeonlyjs/core"
-                                        },
-                                        {
-                                            "prefix": ".",
-                                            "name": "invalidate"
-                                        }
-                                    ]
+                                    "namepath": "module:@codeonlyjs/core.invalidate"
                                 }
                             ]
                         },
@@ -988,31 +925,13 @@
                                     "pos": 10334,
                                     "end": 10348,
                                     "kind": "link",
-                                    "namepath": [
-                                        {
-                                            "prefix": "module:",
-                                            "name": "@codeonlyjs/core"
-                                        },
-                                        {
-                                            "prefix": ".",
-                                            "name": "listen"
-                                        }
-                                    ]
+                                    "namepath": "module:@codeonlyjs/core.listen"
                                 },
                                 {
                                     "pos": 10608,
                                     "end": 10626,
                                     "kind": "link",
-                                    "namepath": [
-                                        {
-                                            "prefix": "module:",
-                                            "name": "@codeonlyjs/core"
-                                        },
-                                        {
-                                            "prefix": ".",
-                                            "name": "invalidate"
-                                        }
-                                    ]
+                                    "namepath": "module:@codeonlyjs/core.invalidate"
                                 }
                             ]
                         },
@@ -2756,7 +2675,7 @@
                     ],
                     "name": "CLObject",
                     "namePath": "module:@codeonlyjs/core.CLObject.CLObject",
-                    "definition": "export interface CLObject \n{\n    get rootNodes(): Node[];\n    update(): void;\n    destroy(): void;\n    setMounted(mounted: boolean): void;\n    readonly isSingleRoot?: boolean;\n    readonly rootNode?: Node;\n}"
+                    "definition": "export interface CLObject \r\n{\r\n    get rootNodes(): Node[];\r\n    update(): void;\r\n    destroy(): void;\r\n    setMounted(mounted: boolean): void;\r\n    readonly isSingleRoot?: boolean;\r\n    readonly rootNode?: Node;\r\n}"
                 }
             ]
         }

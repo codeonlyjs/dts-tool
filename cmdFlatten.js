@@ -1,7 +1,7 @@
 import path from 'node:path';
 import ts from 'typescript';
 import { MappedSource } from "./MappedSource.js";
-import { find_bol_ws, find_next_line_ws } from './LineMap.js';
+import { find_bol_ws, find_next_line_ws } from './textUtils.js';
 import { SourceFile } from "./SourceFile.js";
 import { clargs, showArgs } from "@toptensoftware/clargs";
 import { 

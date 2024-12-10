@@ -1,28 +1,6 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
-import { LineMap } from "./LineMap.js";
 import { MappedSource } from "./MappedSource.js";
-
-let str = `line 0
-
-line 2
-`;
-
-test("lineNumbers", () => {
-
-    let lm = new LineMap(str, { lineBase: 1, columnBase: 1});
-
-    let pos0 = lm.fromOffset(0);
-    assert.equal(pos0.line, 1);
-    assert.equal(pos0.column, 1);
-
-    for (let i=0; i<str.length; i++)
-    {
-        let pos = lm.fromOffset(i);
-        let ofs = lm.toOffset(pos.line, pos.column);
-        assert.equal(ofs, i);
-    }
-});
 
 test("slice", () => {
 
