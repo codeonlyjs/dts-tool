@@ -1,6 +1,6 @@
 {
   "name": "@codeonlyjs/dts-tool",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "Tools for manipulating .d.ts files",
   "copyright": "Copyright © 2024-present codeonlyjs.org",
   "main": "index.js",
@@ -24,7 +24,9 @@
   "dependencies": {
     "@jridgewell/source-map": "^0.3.6",
     "@toptensoftware/clargs": "github:toptensoftware/clargs",
+    "@toptensoftware/jsdoc": "github:toptensoftware/jsdoc",
     "@toptensoftware/line-map": "github:toptensoftware/line-map",
+    "@toptensoftware/unindent": "github:toptensoftware/unindent",
     "typescript": "^5.7.2"
   }
 }

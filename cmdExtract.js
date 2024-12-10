@@ -3,7 +3,8 @@ import ts from 'typescript';
 import { find_bol_ws, find_next_line_ws } from './textUtils.js';
 import { SourceFile } from "./SourceFile.js";
 import { clargs, showArgs } from "@toptensoftware/clargs";
-import { stripComments, parseJsDocComment, trimCommonLeadingSpace, replaceJsdocInline, formatNamePath } from './jsdoc.js';
+import { stripComments, parseBlock, replaceInline, formatNamePath } from '@toptensoftware/jsdoc';
+import { unindent } from "@toptensoftware/unindent";
 import { stripQuotes } from "./utils.js";
 
 
@@ -340,7 +341,7 @@ export function cmdExtract(tail)
         }
 
         // Capture definition
-        common.definition = trimCommonLeadingSpace(stripComments(source.code.substring(
+        common.definition = unindent(stripComments(source.code.substring(
             find_bol_ws(source.code, node.getStart(ast)),
             find_next_line_ws(source.code, node.end)
         ))).trimEnd();
@@ -359,7 +360,7 @@ export function cmdExtract(tail)
             );
 
             // Replace inline Jsdoc directives
-            let linked = replaceJsdocInline(commentText);
+            let linked = replaceInline(commentText);
             linked.links.forEach(x => {
 
                 // Update link position relative to document
@@ -381,7 +382,7 @@ export function cmdExtract(tail)
             });
 
             // Parse JSDoc comments
-            common.jsdoc = parseJsDocComment(linked.body);
+            common.jsdoc = parseBlock(linked.body);
             common.links = linked.links;
 
             // Track documented
