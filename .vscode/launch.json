@@ -13,10 +13,9 @@
             ],
             "program": "${workspaceFolder}\\index.js",
             "args": [ 
-                "flatten", 
-                "@codeonlyjs/core",
-                "../core/index.raw.d.ts", 
-                "--out:../core/index.d.ts",
+                "extract", 
+                "../core/index.d.ts", 
+                "--out:dump.d.ts",
             ]
         }
     ]

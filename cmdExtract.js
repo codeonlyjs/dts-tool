@@ -274,10 +274,13 @@ export function cmdExtract(tail)
             kind: "type-alias",
         }, processCommon(node, false));
 
+        let saveNamePath = namepath;
+        namepath = joinNamePath(node.name.getText(), ".");
         if (node.type.members)
         {
             x.members = node.type.members.map(x => process(x));
         }
+        namepath = saveNamePath;
 
 
         return x;
