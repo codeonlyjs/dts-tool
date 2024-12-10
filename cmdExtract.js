@@ -223,6 +223,14 @@ export function cmdExtract(tail)
                     i++;
                 }
 
+                // Hoist the name path of the accessors on
+                // to the property wrapper
+                prop.namepath = m.namepath;
+
+                // And qualify the accessor name paths with
+                // .get/.set
+                m.namepath += "." + m.kind;
+
                 if (m.kind == "get")
                     prop.members.unshift(m);
                 else
