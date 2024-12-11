@@ -390,7 +390,7 @@ export function cmdExtract(tail)
                         prefix: "module:",
                         name: currentModule,
                     });
-                    x.namepath[1].prefix = ".";
+                    x.namepath[1].delim = ".";
                 }
 
                 // Store link for later checking
@@ -450,25 +450,24 @@ export function cmdExtract(tail)
             if (n.delimiter == "~")
                 return null;
 
-            if (node.members)
+            if (!node.members)
+                return null;
+
+            let subNode = null;
+            for (let m of node.members)
             {
-
-                let subNode = null;
-                for (let m of node.members)
-                {
-                    if (n.prefix == "module:" && m.kind != "module")
-                        continue;
-                    if (n.delimiter == '#' && node.static)
-                        continue;
-                    if (m.name != n.name)
-                        continue;
-                    subNode = m;
-                    break;
-                }
-                if (!subNode)
-                    return null;
+                if (n.prefix == "module:" && m.kind != "module")
+                    continue;
+                if (n.delimiter == '#' && node.static)
+                    continue;
+                if (m.name != n.name)
+                    continue;
+                subNode = m;
+                break;
             }
-
+            if (!subNode)
+                return null;
+            node = subNode;
         }
         return node;
     }
